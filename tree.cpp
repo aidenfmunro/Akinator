@@ -10,8 +10,8 @@ ErrorCode CreateTree(Tree* tree)
     tree->root = tempNode;
     tree->size = 0;
 
-    tree->root->left = NULL;
-    tree->root->right = NULL;
+    tree->root->left   = NULL;
+    tree->root->right  = NULL;
     tree->root->parent = NULL;
 
     tree->error = 0;
@@ -33,7 +33,7 @@ ErrorCode deleteNode(Node* node)
 
     free(node); 
 
-    free(node->data);
+    /* free(node->data); */
 
     return OK;
 }
@@ -53,25 +53,28 @@ ErrorCode DestroyTree(Tree* tree)
     return OK;
 }
 
-Node* insertLeft(Tree* tree, Node* node, char* data)
+Node* InsertLeft(Tree* tree, Node* node, /* char* */ int data)
 {
     AssertSoft(tree, NULL);
     AssertSoft(node, NULL);
 
     if (tree->size == 0)
     {
+        /*
         SafeCalloc(tempData, strlen(data) + 1, char, NULL);
 
         tree->root->data = tempData;
         
         strcpy(tree->root->data, data);
+        */
+        tree->root->data = data;
 
         tree->size++;
 
         return tree->root;
     }
 
-    if (! node->left)
+    if (node->left)
     {
         tree->error = REPEAT_INSERT_LEFT;
 
@@ -83,11 +86,15 @@ Node* insertLeft(Tree* tree, Node* node, char* data)
     newNode->left = NULL;
     newNode->right = NULL;
 
+    newNode->data = data;
+
+    /*
     SafeCalloc(newData, strlen(data) + 1, char, NULL);
 
     newNode->data = newData;
 
     strcpy(newNode->data, newData);
+    */
 
     node->left = newNode;
     newNode->parent = node;
@@ -97,25 +104,29 @@ Node* insertLeft(Tree* tree, Node* node, char* data)
     return newNode;
 }
 
-Node* insertRight(Tree* tree, Node* node, char* data)
+Node* InsertRight(Tree* tree, Node* node, /* char* */ int data)
 {
     AssertSoft(tree, NULL);
     AssertSoft(node, NULL);
 
     if (tree->size == 0)
     {
+        /*
         SafeCalloc(tempData, strlen(data) + 1, char, NULL);
 
         tree->root->data = tempData;
 
         strcpy(tree->root->data, data);
+        */
+
+        tree->root->data = data;
 
         tree->size++;
 
         return tree->root;
     }
 
-    if (! node->right)
+    if (node->right)
     {
         tree->error = REPEAT_INSERT_RIGHT;
 
@@ -127,11 +138,15 @@ Node* insertRight(Tree* tree, Node* node, char* data)
     newNode->left = NULL;
     newNode->right = NULL;
 
+    newNode->data = data;
+
+    /*
     SafeCalloc(newData, strlen(data) + 1, char, NULL);
 
     newNode->data = newData;
 
     strcpy(newNode->data, newData);
+    */
 
     node->right = newNode;
     newNode->parent = node;
@@ -166,8 +181,6 @@ ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter)
 
 ErrorCode PrintTree(Node* node, FILE* outFile)
 {
-    AssertSoft(node, NULL_PTR);
-
     if (! node)
     {
         fprintf(outFile, "nil");
@@ -178,7 +191,7 @@ ErrorCode PrintTree(Node* node, FILE* outFile)
 
     PrintTree(node->left, outFile);
 
-    fprintf(outFile, "%s", node->data);
+    fprintf(outFile, " "SPECIFIER" ", node->data); // change back to %s
 
     PrintTree(node->right, outFile);
 

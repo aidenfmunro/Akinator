@@ -7,6 +7,8 @@
 
 typedef int ErrorCode;
 
+#define SPECIFIER "%d"
+
 enum Error
 {
     OK,
@@ -25,7 +27,7 @@ struct String
 
 struct Node
 {
-    char* data;
+    /* char* */ int data;
 
     Node* parent;
 
@@ -42,5 +44,21 @@ struct Tree
 
     ErrorCode error;  
 };  
+
+ErrorCode CreateTree(Tree* tree);
+
+ErrorCode DestroyTree(Tree* tree);
+
+Node* InsertLeft(Tree* tree, Node* node, /* char* */ int data);
+
+Node* InsertRight(Tree* tree, Node* node, /* char* */ int data);
+
+ErrorCode PrintTree(Node* node, FILE* outFile);
+
+ErrorCode PrintTreeGraph(Node* node, FILE* outFile);
+
+ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter);
+
+ErrorCode deleteNode(Node* node);
 
 #endif
