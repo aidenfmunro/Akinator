@@ -1,0 +1,19 @@
+digraph binary_tree {
+  node [shape = "circle", style = "filled", fillcolor = "blue", fontcolor = "#FFFFFF", margin = "0.01"];
+  rankdir = "TB";
+
+  label = "Tree Dump";
+  "10" [shape = "record", label = "{10 | parent\n(nil) | <f0> pos\n0x56277ffff660| left\n0x56277ffff720 | right\n0x56277ffff690\n}"];
+  "10"->"40";
+  "40"->"10";
+  "40" [shape = "record", fillcolor = "red", label = "{40 | parent\n0x56277ffff660 | <f0> pos\n0x56277ffff720| left\n(nil) | right\n(nil)\n}"];
+  "10"->"20";
+  "20"->"10";
+  "20" [shape = "record", label = "{20 | parent\n0x56277ffff660 | <f0> pos\n0x56277ffff690| left\n0x56277ffff6c0 | right\n0x56277ffff6f0\n}"];
+  "20"->"30";
+  "30"->"20";
+  "30" [shape = "record", fillcolor = "red", label = "{30 | parent\n0x56277ffff690 | <f0> pos\n0x56277ffff6c0| left\n(nil) | right\n(nil)\n}"];
+  "20"->"50";
+  "50"->"20";
+  "50" [shape = "record", fillcolor = "red", label = "{50 | parent\n0x56277ffff690 | <f0> pos\n0x56277ffff6f0| left\n(nil) | right\n(nil)\n}"];
+}

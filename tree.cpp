@@ -164,16 +164,16 @@ ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter)
 
     (*counter)++;
 
-    if (! node->left && (node->left->parent != node || node->right->parent != node))
+    if (node->left != NULL && (node->left->parent != node || node->right->parent != node))
     {
         tree->error = TREE_LINKING_ERROR;
         return TREE_LINKING_ERROR;
     }
 
-    if (node->left)
+    if (node->left != NULL)
         checkTreeLinks(tree, node->left, counter);
     
-    if (node->right)
+    if (node->right != NULL)
         checkTreeLinks(tree, node->right, counter);
 
     return OK;
@@ -181,7 +181,7 @@ ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter)
 
 ErrorCode PrintTree(Node* node, FILE* outFile)
 {
-    if (! node)
+    if (node == NULL)
     {
         fprintf(outFile, "nil");
         return OK;
@@ -202,10 +202,48 @@ ErrorCode PrintTree(Node* node, FILE* outFile)
 
 ErrorCode PrintTreeGraph(Node* node, FILE* outFile)
 {
-    if (! node->left && ! node->right)
+    if (node->left == NULL && node->right == NULL)
+        fprintf(outFile, "  \"%d\" [shape = \"record\", fillcolor = \"red\", label = \"{%d | parent\\n%p | <f0> pos\\n%p| left\\n%p | right\\n%p\\n}\"];\n", node->data, node->data, node->parent, node, node->left, node->right);
+    else
+        fprintf(outFile, "  \"%d\" [shape = \"record\", label = \"{%d | parent\\n%p | <f0> pos\\n%p| left\\n%p | right\\n%p\\n}\"];\n", node->data, node->data, node->parent, node, node->left, node->right);
+
+    if (node->left != NULL)
     {
-        
+        if (node->left->parent == node)
+        {
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->data, node->left->data);
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->left->data, node->data);
+        }
+        else
+        {
+            fprintf(outFile, "  edge [color=\"#FE6200\"];\n");
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->data, node->left->data);
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->left->data, node->left->parent->data);
+            fprintf(outFile, "  edge [color=\"#000000\"];\n");
+        }
+
+        PrintTreeGraph(node->left, outFile);
     }
+
+    if (node->right != nullptr)
+    {
+        if (node->right->parent == node)
+        {
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->data, node->right->data);
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->right->data, node->data);
+        }
+        else
+        {
+            fprintf(outFile, "  edge [color=\"#FE6200\"];\n");
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->data, node->right->data);
+            fprintf(outFile, "  \"%d\"->\"%d\";\n", node->right->data, node->right->parent->data);
+            fprintf(outFile, "  edge [color=\"#000000\"];\n");
+        }
+
+        PrintTreeGraph(node->right, outFile);
+    }
+    
+    return OK;
 }
 
 
