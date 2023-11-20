@@ -7,7 +7,7 @@
             return INVALID_PTR;             \
        } while(0);
 
-#define SafeCalloc(var, nmemb, type, error)             \
+#define SafeCalloc(var, nmemb, type, error)                     \
     type* var = (type*)calloc(nmemb, sizeof(type));     \
                                                         \
     if (!var)                                           \
