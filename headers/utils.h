@@ -40,4 +40,7 @@ if (!(expression))                                                              
 #define myClose(fileVar) \
         fclose(fileVar);    
 
+#define myRead(filename, mode, filevar)        \
+    
+
 #endif 

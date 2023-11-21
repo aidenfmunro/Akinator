@@ -1,4 +1,5 @@
 #include "tree.h"
+#include "akinator.h"
 
 int main(void)
 {
@@ -8,24 +9,19 @@ int main(void)
 
     CreateTree(&tree);
 
-    Node* node = Insert(&tree, tree.root, "aboba", RIGHT);
+    Insert(&tree, tree.root, "abobaaaaaaaaaaaaaaaaa", RIGHT);
 
-    printf("%p\n", node);
-
-    node = Insert(&tree, node, "bruh", LEFT);
-
-    printf("%p\n", node);
-
-    node = Insert(&tree, node, "omegalul", LEFT);
-
-    printf("%p\n", node);
+    Insert(&tree, tree.root, "ASd", LEFT);
 
     DumpTreeGraph(tree.root, "treegraph.dot");
 
     PrintTree(tree.root, fp);
 
-    // DestroyTree(&tree);
-
     fclose(fp);
 
+    ConstructTree(&tree, "tree.txt");
+
+    DestroyTree(&tree);
+
+    return OK;
 }

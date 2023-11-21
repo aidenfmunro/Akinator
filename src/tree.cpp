@@ -27,6 +27,8 @@ ErrorCode CreateTree(Tree* tree)
 
     tree->root->data = tempData;
 
+    tree->size = 1;
+
     tree->error = 0;
 
     return OK;
@@ -44,16 +46,16 @@ ErrorCode deleteNode(Node* node)
     node->left   = NULL;
     node->parent = NULL;
 
-    free(node); 
+    // free(node->data);
 
-    free(node->data);
+    free(node); 
 
     return OK;
 }
 
 ErrorCode DestroyTree(Tree* tree)
 {
-    AssertSoft(tree, NULL);
+    AssertSoft(tree, NULL_PTR);
 
     deleteNode(tree->root);
 
@@ -70,23 +72,14 @@ Node* Insert(Tree* tree, Node* node, NodeElem_t data, Side side) // TODO: dsl fo
 {                                                   
     AssertSoft(tree, NULL);
 
-    if (tree->size == 0)
-    {
-        tree->root->data = data;
-
-        tree->size++;
-
-        return tree->root;
-    }
-
-    if (node->right)
+    if (side == RIGHT && node->right)
     {
         tree->error = REPEAT_INSERT_RIGHT; 
 
         return NULL;
     }
 
-    if (node->right)
+    if (side == LEFT && node->left)
     {
         tree->error = REPEAT_INSERT_LEFT;
 
@@ -104,10 +97,16 @@ Node* Insert(Tree* tree, Node* node, NodeElem_t data, Side side) // TODO: dsl fo
 
     strcpy(newNode->data, data);
 
-    if (side == LEFT)
+    if      (side == LEFT)
         node->left = newNode;
     else if (side == RIGHT)
         node->right = newNode;
+    else
+    {
+        tree->error = UNKNOWN_POSITION;
+
+        return NULL;
+    }
     
     newNode->parent = node;
 
@@ -144,7 +143,10 @@ ErrorCode searchNode(const char* name, Node* node, Stack* path)
     AssertSoft(name, NULL_PTR);
     AssertSoft(node, NULL_PTR);
     AssertSoft(path, NULL_PTR);
-    
+
+
+
+
 }
 
 
@@ -153,19 +155,19 @@ ErrorCode PrintTree(Node* node, FILE* outFile) // TODO: create tree with txt fil
 {
     if (node == NULL)
     {
-        fprintf(outFile, "nil");
+        fprintf(outFile, "nil ");
         return OK;
     }
 
-    fprintf(outFile, "(");
+    fprintf(outFile, "( ");
+
+    fprintf(outFile, ""SPECIFIER" ", node->data); 
 
     PrintTree(node->left, outFile);
 
-    fprintf(outFile, " "SPECIFIER" ", node->data); 
-
     PrintTree(node->right, outFile);
 
-    fprintf(outFile, ")");
+    fprintf(outFile, ") ");
 
     return OK;
 }

@@ -3,7 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include "tree.h"
 
 const int MAX_STR_SIZE = 100;
+
+ErrorCode ConstructTree(Tree* tree, const char* basefilename);
 
 #endif

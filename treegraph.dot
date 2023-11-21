@@ -3,11 +3,11 @@
   rankdir = "TB";
 
   label = "Tree Dump";
-  "aboba" [shape = "record", label = "{aboba | parent\n(nil) | <f0> pos\n0x603000000040| left\n0x603000000070 | right\n(nil)\n}"];
-  "aboba"->"bruh";
-  "bruh"->"aboba";
-  "bruh" [shape = "record", label = "{bruh | parent\n0x603000000040 | <f0> pos\n0x603000000070| left\n0x6030000000a0 | right\n(nil)\n}"];
-  "bruh"->"omegalul";
-  "omegalul"->"bruh";
-  "omegalul" [shape = "record", fillcolor = "red", label = "{omegalul | parent\n0x603000000070 | <f0> pos\n0x6030000000a0| left\n(nil) | right\n(nil)\n}"];
+  "WHO?" [shape = "record", label = "{WHO? | parent\n(nil) | <f0> pos\n0x603000000040| left\n0x6030000000d0 | right\n0x603000000070\n}"];
+  "WHO?"->"ASd";
+  "ASd"->"WHO?";
+  "ASd" [shape = "record", fillcolor = "red", label = "{ASd | parent\n0x603000000040 | <f0> pos\n0x6030000000d0| left\n(nil) | right\n(nil)\n}"];
+  "WHO?"->"abobaaaaaaaaaaaaaaaaa";
+  "abobaaaaaaaaaaaaaaaaa"->"WHO?";
+  "abobaaaaaaaaaaaaaaaaa" [shape = "record", fillcolor = "red", label = "{abobaaaaaaaaaaaaaaaaa | parent\n0x603000000040 | <f0> pos\n0x603000000070| left\n(nil) | right\n(nil)\n}"];
   }
