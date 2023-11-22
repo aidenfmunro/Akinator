@@ -3,12 +3,12 @@
 #include "stackfuncs.h"
 #include "utils.h"
 
-ErrorCode ConstructTree  (Tree* tree, const char* basefilename);
-Node*     _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
-Node*     _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
-Node*     _createNode(NodeElem_t data, Node* left, Node* right);
-ErrorCode  _searchName(Tree* tree, const char* name, Stack* path);
-Node* _searchNode(const char* name, Node* node);
+ErrorCode  ConstructTree      (Tree* tree, const char* basefilename);
+Node*      _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
+Node*      _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
+Node*      _createNode        (NodeElem_t data, Node* left, Node* right);
+ErrorCode  _searchName        (Tree* tree, const char* name, Stack* path);
+Node*      _searchNode        (const char* name, Node* node);
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 {
@@ -116,13 +116,15 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
     return newNode;    
 }
 
-ErrorCode definition(Tree* tree, const char* name)
+ErrorCode getDefinition(Tree* tree, const char* name)
 {
     Stack path = {};
 
     CreateStack(path);
 
     tree->error = _searchName(tree, name, &path);
+
+    AssertSoft(! tree->error, UNKNOWN_NAME);
 
     Node* curNode = tree->root;
 

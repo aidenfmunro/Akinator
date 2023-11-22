@@ -10,6 +10,6 @@ const int MAX_STR_SIZE = 100;
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename);
 
-ErrorCode definition(Tree* tree, const char* name);
+ErrorCode getDefinition(Tree* tree, const char* name);
 
 #endif
