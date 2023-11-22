@@ -70,7 +70,7 @@ enum Error
     SYNTAX_ERROR
 };
 
-ErrorCode CreateTree(Tree* tree);
+// ErrorCode CreateTree(Tree* tree);
 
 ErrorCode DestroyTree(Tree* tree);
 

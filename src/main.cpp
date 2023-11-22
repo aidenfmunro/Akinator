@@ -13,6 +13,8 @@ int main(void)
 
     printf("%d\n", tree.size);
 
+    definition(&tree, "mikhail");
+
     DestroyTree(&tree);
 
     return OK;

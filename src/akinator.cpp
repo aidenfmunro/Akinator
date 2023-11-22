@@ -7,6 +7,8 @@ ErrorCode ConstructTree  (Tree* tree, const char* basefilename);
 Node*     _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
 Node*     _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*     _createNode(NodeElem_t data, Node* left, Node* right);
+Stack _searchName(Tree* tree, const char* name, Stack path);
+Node* _searchNode(const char* name, Node* node);
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 {
@@ -114,21 +116,91 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
     return newNode;    
 }
 
+ErrorCode definition(Tree* tree, const char* name)
+{
+    Stack path = {};
+
+    CreateStack(path);
+
+    path = _searchName(tree, name, path);
+
+    Node* curNode = tree->root;
+
+    for (size_t i = 0; i < path.size; i++)
+    {
+        printf("%s -> ", curNode->data);
+
+        int turn = Pop(&path);
+
+        if (turn == 1)
+        {
+            curNode = curNode->right;
+        }
+        else if (turn == 0)
+        {
+            curNode = curNode->left;
+        }
+    }
+
+    DestroyStack(&path);
+
+    return OK;
+}
+
+Stack _searchName(Tree* tree, const char* name, Stack path)
+{
+    Node* curNode = _searchNode(name, tree->root);
+
+    printf("found: %p\n", curNode);
+
+    while (curNode != tree->root)
+    {
+        if      (curNode->parent == curNode->parent->left)
+        {
+            Push(&path, 0);
+        }
+        else if (curNode->parent == curNode->parent->right)
+        {
+            Push(&path, 1);
+        }
+
+        curNode = curNode->parent;
+    }
+
+    return path;
+}
+
 Node* _searchNode(const char* name, Node* node)
 {
+    AssertSoft(name, NULL);
+
+    if (!node)
+    {
+        return NULL;
+    }    
+
+    if (node)
+    {
+        printf("%s, %s, %d\n", node->data, name, strcmp(name, node->data));
+    }
+
     if (strcmp(node->data, name) == 0)
     {
-        return node; 
+        return node;
     }
 
-    if (node->left)
+    Node* leftSubTree = _searchNode(name, node->left);
+
+    if (leftSubTree)
     {
-        _searchNode(name, node->left);
+        return leftSubTree;
     }
 
-    if (node->right)
+    Node* rightSubTree = _searchNode(name, node->right);
+
+    if (rightSubTree)
     {
-        _searchNode(name, node->right);
+        return rightSubTree;
     }
 
     return NULL;
