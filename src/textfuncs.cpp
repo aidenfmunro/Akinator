@@ -15,9 +15,9 @@ void CreateText(Text* text, const char* filename, size_t sortmode)
 
     text->size     = getSize(filename);
     text->buffer   = parseBuf(text, filename);
-    text->numLines = countLines(text);
-    text->lineptrs = getLinePointers(text);
-    text->lines    = getLines(text);
+    text->numTokens = countTokens(text);
+    text->lineptrs = getTokenPointers(text);
+    text->tokens    = getTokens(text);
 
     generalSort(text, sortmode);
 }
@@ -28,10 +28,10 @@ void AppendText(Text* text, const char* filename)
 
   FILE* fp = fopen(filename, "a");
 
-  for (size_t i = 0; i < text->numLines; i++)
+  for (size_t i = 0; i < text->numTokens; i++)
     {
-      char* str = getLine(text, i);
-      if (*str != '\r') //skip lines with spaces
+      char* str = getToken(text, i);
+      if (*str != '\r') //skip tokens with spaces
           fputs(str, fp);
     }
   fputs("------------------------------------------------\n", fp);
@@ -43,14 +43,14 @@ void DestroyText(Text* text)
 {
   free((void*)text->lineptrs);
   free((void*)text->buffer);
-  free((void*)text->lines);
+  free((void*)text->tokens);
 }
 
-char* const* getLinePointers(Text *text)
+char* const* getTokenPointers(Text *text)
 {
     myAssert(text, NULLPTR);
 
-    char** lineptrs = (char**)calloc(text->numLines, sizeof(char*));
+    char** lineptrs = (char**)calloc(text->numTokens, sizeof(char*));
     
     *lineptrs = text->buffer;
 
@@ -64,7 +64,7 @@ char* const* getLinePointers(Text *text)
         textptr = strchr(textptr + 1, ' '); 
       }
 
-    lineptrs -= (text->numLines - 1);
+    lineptrs -= (text->numTokens - 1);
 
     return (char* const*)lineptrs;
 }
@@ -94,38 +94,38 @@ size_t getSize(const char* filename)
     return stats.st_size;
 }
 
-size_t countLines(const Text* text)
+size_t countTokens(const Text* text)
 {
     myAssert(text, NULLPTR);
 
-    size_t lines = 1;
+    size_t tokens = 1;
     for (size_t i = 0; i < text->size; i++)
         if (text->buffer[i] == ' ') // space for Akinator
-            lines++;
+            tokens++;
 
-    return lines;
+    return tokens;
 }
 
-char* getLine(Text* text, size_t numLine)
+char* getToken(Text* text, size_t numToken)
 {
-    myAssert(numLine < text->numLines, OUTOFBOUNDS);
+    myAssert(numToken < text->numTokens, OUTOFBOUNDS);
 
-    return text->lines[numLine].string;
+    return text->tokens[numToken].string;
 }
 
-struct Line* getLines(Text* text)
+struct Token* getTokens(Text* text)
 {
     myAssert(text, NULLPTR);
 
-    Line* lines = (struct Line*)calloc(text->numLines, sizeof(Line));
+    Token* tokens = (struct Token*)calloc(text->numTokens, sizeof(Token));
 
-    for (size_t i = 0; i < text->numLines; i++)
+    for (size_t i = 0; i < text->numTokens; i++)
       {
-        lines[i].length = strlen(text->lineptrs[i]);
-        lines[i].string = text->lineptrs[i];
+        tokens[i].length = strlen(text->lineptrs[i]);
+        tokens[i].string = text->lineptrs[i];
       }
     
-    return lines;
+    return tokens;
 }
 
 void generalSort(Text* text, size_t sortmode)
@@ -135,11 +135,11 @@ void generalSort(Text* text, size_t sortmode)
     switch (sortmode)
     {
     case FORWARDS:
-        quickSort((void*)text->lines, 0, text->numLines - 1, sizeof(struct Line), compareStringForw);
+        quickSort((void*)text->tokens, 0, text->numTokens - 1, sizeof(struct Token), compareStringForw);
         break;
     
     case BACKWARDS:
-        quickSort((void*)text->lines, 0, text->numLines - 1, sizeof(struct Line), compareStringBack);
+        quickSort((void*)text->tokens, 0, text->numTokens - 1, sizeof(struct Token), compareStringBack);
         break;
 
     case NONE:
@@ -210,8 +210,8 @@ int compareStringForw(const void* a, const void* b)
     myAssert(a, NULLPTR);
     myAssert(b, NULLPTR);
     
-    struct Line* str1 = (Line*)a;
-    struct Line* str2 = (Line*)b;
+    struct Token* str1 = (Token*)a;
+    struct Token* str2 = (Token*)b;
 
     char* strptr1 = str1->string;
     char* strptr2 = str2->string;
@@ -242,8 +242,8 @@ int compareStringBack(const void* a, const void* b)
     myAssert(a, NULLPTR);
     myAssert(b, NULLPTR);
 
-    struct Line* str1 = (Line*)a;
-    struct Line* str2 = (Line*)b;
+    struct Token* str1 = (Token*)a;
+    struct Token* str2 = (Token*)b;
 
     char* strptr1 = str1->string + str1->length - 1;
     char* strptr2 = str2->string + str2->length - 1; 
@@ -290,7 +290,7 @@ size_t CheckFile(const char* filename)
     return INCORRECT;
 }
 
-int StringIsEmpty(const Line* line)
+int StringIsEmpty(const Token* line)
 {
     for (size_t i = 0; i < line->length; i++)
         if (!isspace(line->string[i]))

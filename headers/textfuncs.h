@@ -80,7 +80,7 @@ enum CORRECTFILE
 
 /**
  * 
- * Text structure that contains line pointers, buffer, size & amount of lines.
+ * Text structure that contains line pointers, buffer, size & amount of tokens.
  * 
  */
 
@@ -90,17 +90,17 @@ struct Text
     char*  buffer;
     char* const* lineptrs;
     size_t size,
-           numLines;
-    struct Line* lines;
+           numTokens;
+    struct Token* tokens;
 };
 
 /**
  * 
- * Line structure that contains a string and the length of the string.
+ * Token structure that contains a string and the length of the string.
  * 
  */
 
-struct Line
+struct Token
 {
     char* string;
     size_t length;
@@ -169,16 +169,16 @@ size_t getSize(const char* filename);
 
 /**
  * 
- * \brief Gets the amount of lines.
+ * \brief Gets the amount of tokens.
  * 
  * @param[in] filename - name of file.
- * @param[out] lines - amount of lines.
+ * @param[out] tokens - amount of tokens.
  * 
  * \return size of file.
  * 
  */
 
-size_t countLines(const Text* text);
+size_t countTokens(const Text* text);
 
 /**
  * 
@@ -205,34 +205,34 @@ char* parseBuf(Text* text, const char* filename);
  * 
  */
 
-char* const* getLinePointers(Text *text);
+char* const* getTokenPointers(Text *text);
 
 /**
  * 
  * \brief Gets the string of the line.
  * 
  * @param[in] text - text structure.
- * @param[in] numLine - the number of line that needs to be return.
+ * @param[in] numToken - the number of line that needs to be return.
  * @param[out] string - line string.
  * 
  * \return string.
  * 
  */
 
-char* getLine(Text* text, size_t numLine);
+char* getToken(Text* text, size_t numToken);
 
 /**
  * 
  * \brief Gets lots of line structures.
  * 
  * @param[in] text - text structure.
- * @param[out] struct Line.   
+ * @param[out] struct Token.   
  * 
  * \return string.
  * 
  */
 
-struct Line* getLines(Text* text);
+struct Token* getTokens(Text* text);
 
 /**
  * 
@@ -289,13 +289,13 @@ int partition(void* array, int left, int right, size_t elemSize, compareFunc_t c
  * \brief Bubble Sort realisation.
  * 
  * @param[in] array - pointer.
- * @param[in] lines - amount of lines.
+ * @param[in] tokens - amount of tokens.
  * @param[in] elemSize - size of array element.
  * @param[in] compareFunc - compare function.
  * 
  */
 
-void bubbleSort(void* array, size_t lines, const size_t elemSize, compareFunc_t compareFunc);
+void bubbleSort(void* array, size_t tokens, const size_t elemSize, compareFunc_t compareFunc);
 
 /**
  * 
@@ -324,6 +324,6 @@ int compareStringForw(const void* a, const void* b);
 
 int compareStringBack(const void* a, const void* b);
 
-int StringIsEmpty(const Line* line);
+int StringIsEmpty(const Token* line);
 
 #endif

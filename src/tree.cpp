@@ -46,7 +46,7 @@ ErrorCode deleteNode(Node* node)
     node->left   = NULL;
     node->parent = NULL;
 
-    // free(node->data);
+    free(node->data);
 
     free(node); 
 

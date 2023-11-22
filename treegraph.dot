@@ -3,11 +3,14 @@
   rankdir = "TB";
 
   label = "Tree Dump";
-  "WHO?" [shape = "record", label = "{WHO? | parent\n(nil) | <f0> pos\n0x603000000040| left\n0x6030000000d0 | right\n0x603000000070\n}"];
+  "WHO?" [shape = "record", label = "{WHO? | parent\n(nil) | <f0> pos\n0x603000000100| left\n0x603000000040 | right\n0x6030000000d0\n}"];
   "WHO?"->"ASd";
   "ASd"->"WHO?";
-  "ASd" [shape = "record", fillcolor = "red", label = "{ASd | parent\n0x603000000040 | <f0> pos\n0x6030000000d0| left\n(nil) | right\n(nil)\n}"];
+  "ASd" [shape = "record", fillcolor = "red", label = "{ASd | parent\n0x603000000100 | <f0> pos\n0x603000000040| left\n(nil) | right\n(nil)\n}"];
   "WHO?"->"abobaaaaaaaaaaaaaaaaa";
   "abobaaaaaaaaaaaaaaaaa"->"WHO?";
-  "abobaaaaaaaaaaaaaaaaa" [shape = "record", fillcolor = "red", label = "{abobaaaaaaaaaaaaaaaaa | parent\n0x603000000040 | <f0> pos\n0x603000000070| left\n(nil) | right\n(nil)\n}"];
+  "abobaaaaaaaaaaaaaaaaa" [shape = "record", label = "{abobaaaaaaaaaaaaaaaaa | parent\n0x603000000100 | <f0> pos\n0x6030000000d0| left\n(nil) | right\n0x6030000000a0\n}"];
+  "abobaaaaaaaaaaaaaaaaa"->"megas";
+  "megas"->"abobaaaaaaaaaaaaaaaaa";
+  "megas" [shape = "record", fillcolor = "red", label = "{megas | parent\n0x6030000000d0 | <f0> pos\n0x6030000000a0| left\n(nil) | right\n(nil)\n}"];
   }

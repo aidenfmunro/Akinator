@@ -2,7 +2,11 @@
 #include "textfuncs.h"
 #include "utils.h"
 
-Node* _createNode(Tree* tree, Node* node, char* buffer, int* counter);
+ErrorCode ConstructTree  (Tree* tree, const char* basefilename);
+Node*     _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
+Node*     _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
+Node*     _createNode(NodeElem_t data, Node* left, Node* right);
+ErrorCode _connectWithParent(Node* node);
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 {
@@ -13,32 +17,111 @@ ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 
     CreateText(&base, basefilename, NONE);
 
-    for (size_t i = 0; i < base.numLines; i++)
+    printf("%d\n", base.numTokens);
+
+    for (size_t i = 0; i < base.numTokens; i++)
     {
-        printf("token [%d]: %s\n", i, base.lines[i].string);
+        printf("token [%d]: %s\n", i, base.tokens[i].string);
     }
 
-    size_t curToken = 0;
+    size_t curTokenNum = 0;
+
+    tree->root = _recursiveReadTree(tree, &base, &curTokenNum);
+
+    _connectWithParent(tree->root);
 
     DestroyText(&base);
 
     return OK;   
 }
 
-Node* _recursiveRead(Text* base, size_t* curToken)
+Node* _recursiveReadTree(Tree* tree, Text* base, size_t* curTokenNum)
 {   
-    AssertSoft(base, NULL);
-    AssertSoft(*curToken < base->numLines, NULL);
+    AssertSoft(tree,                           NULL);
+    AssertSoft(base,                           NULL);
+    AssertSoft(*curTokenNum < base->numTokens, NULL);
+
+    const Token* token = &base->tokens[(*curTokenNum)++];
+
+    const char* openBracket = strchr(token->string, '(');
+    if (openBracket)
+        return _recursiveReadNode(tree, base, curTokenNum);
+
+    const char* nil = strstr(token->string, "nil");
+
+    if (nil)
+        return NULL;
+    
+    tree->error = SYNTAX_ERROR;
+
+    return NULL;
 }
 
-Node* _createNode(Tree* tree, Node* node, char* buffer, int* counter)
+Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
 {
-    AssertSoft(tree,   NULL);
-    AssertSoft(buffer, NULL);
+    AssertSoft(tree,                           NULL);
+    AssertSoft(base,                           NULL);
+    AssertSoft(*curTokenNum < base->numTokens, NULL);
 
+    const Token* token = &base->tokens[(*curTokenNum)++];
+
+    int countChars = 0;
+
+    SafeCalloc(data, token->length + 1, char, NULL);
+
+    if (sscanf(token->string, SPECIFIER "%n", data, &countChars) != 1 || StringIsEmpty(token))
+    {
+        tree->error = UNRECOGNISED_TOKEN;
+        return NULL;
+    }
+
+    Node* leftSubTree  = _recursiveReadTree(tree, base, curTokenNum);
+
+    Node* rightSubTree = _recursiveReadTree(tree, base, curTokenNum); 
+
+    Node* newNode      = _createNode(data, leftSubTree, rightSubTree);
+
+    token = &base->tokens[(*curTokenNum)++];
+
+    const char* closeBracket = strchr(token->string, ')');
+
+    if (!closeBracket)
+    {
+        tree->error = SYNTAX_ERROR;
+        return NULL;
+    }
+
+    return newNode;
+}
+
+Node* _createNode(NodeElem_t data, Node* left, Node* right)
+{
     SafeCalloc(newNode, 1, Node, NULL);
 
-    (tree->size)++;
+    newNode->data = data;
 
+    newNode->left = left;
 
+    newNode->right = right;
+
+    return newNode;    
+}
+
+ErrorCode _connectWithParent(Node* node)
+{
+    if (node->left)
+    {
+        node->left->parent = node;
+
+        _connectWithParent(node->left);
+    }
+
+    if (node->right)
+    {
+        node->right->parent = node;
+
+        _connectWithParent(node->right);
+    }
+
+    return OK;
 }

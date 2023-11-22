@@ -3,25 +3,20 @@
 
 int main(void)
 {
-    FILE* fp = fopen("tree.txt", "w+");
-
     Tree tree = {};
 
-    CreateTree(&tree);
+    ConstructTree(&tree, "tree.txt");
 
-    Insert(&tree, tree.root, "abobaaaaaaaaaaaaaaaaa", RIGHT);
-
-    Insert(&tree, tree.root, "ASd", LEFT);
-
-    DumpTreeGraph(tree.root, "treegraph.dot");
+    FILE* fp = fopen("out.txt", "w+");
 
     PrintTree(tree.root, fp);
 
     fclose(fp);
 
-    ConstructTree(&tree, "tree.txt");
+    DumpTreeGraph(tree.root, "treegraph.dot");
 
     DestroyTree(&tree);
 
     return OK;
+
 }
