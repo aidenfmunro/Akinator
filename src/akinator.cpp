@@ -85,6 +85,7 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
     if (!closeBracket)
     {
         tree->error = SYNTAX_ERROR;
+
         return NULL;
     }
 
@@ -99,6 +100,7 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
 
     if (left)
         left->parent  = newNode; // TODO: acquire parents 
+        
     if (right)
         right->parent = newNode;
     

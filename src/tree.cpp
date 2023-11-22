@@ -4,15 +4,15 @@
 
 static int DUMP_NUM = 0;
 
-const int MAX_COMMAND_LENGTH = 256;
+const int MAX_COMMAND_LENGTH  = 256;
 
 const int MAX_FILENAME_LENGTH = 256;
 
-static ErrorCode _dumpTreeDot(Node* node, FILE* outFile);
+static ErrorCode _dumpTreeDot    (Node* node, FILE* outFile);
 
-static ErrorCode verifyTree(Tree* tree);
+static ErrorCode _dumpTreeTxt    (Node* node, FILE* outFile);
 
-static ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter);
+static ErrorCode _checkTreeLinks (Tree* tree, Node* node, size_t* counter);
 
 ErrorCode CreateTree(Tree* tree)
 {
@@ -74,58 +74,11 @@ ErrorCode DestroyTree(Tree* tree)
     return OK;
 }
 
-Node* Insert(Tree* tree, Node* node, NodeElem_t data, Side side) // TODO: dsl for left and right 
-{                                                   
-    AssertSoft(tree, NULL);
-
-    if (side == RIGHT && node->right)
-    {
-        tree->error = REPEAT_INSERT_RIGHT; 
-
-        return NULL;
-    }
-
-    if (side == LEFT && node->left)
-    {
-        tree->error = REPEAT_INSERT_LEFT;
-
-        return NULL;
-    }
-
-    SafeCalloc(newNode, 1, Node, NULL);
-
-    newNode->left = NULL;
-    newNode->right = NULL;
-
-    SafeCalloc(newData, strlen(data) + 1, char, NULL);
-
-    newNode->data = newData;
-
-    strcpy(newNode->data, data);
-
-    if      (side == LEFT)
-        node->left = newNode;
-    else if (side == RIGHT)
-        node->right = newNode;
-    else
-    {
-        tree->error = UNKNOWN_POSITION;
-
-        return NULL;
-    }
-    
-    newNode->parent = node;
-
-    tree->size++;
-
-    return newNode;
-}
-
-static ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter)
+static ErrorCode _checkTreeLinks(Tree* tree, Node* node, size_t* counter)
 {
     AssertSoft(tree, NULL_PTR);
     
-    AssertSoft(node, NULL_PTR);  // TODO: counter check
+    // TODO: counter check
 
     (*counter)++; // TODO: make it in 
 
@@ -136,10 +89,10 @@ static ErrorCode checkTreeLinks(Tree* tree, Node* node, size_t* counter)
     }
 
     if (node->left != NULL)
-        checkTreeLinks(tree, node->left, counter);
+        _checkTreeLinks(tree, node->left, counter);
     
     if (node->right != NULL)
-        checkTreeLinks(tree, node->right, counter);
+        _checkTreeLinks(tree, node->right, counter);
 
     return OK;
 }
@@ -150,35 +103,53 @@ ErrorCode searchNode(const char* name, Node* node, Stack* path)
     AssertSoft(node, NULL_PTR);
     AssertSoft(path, NULL_PTR);
 
-
-
-
+    return OK;
 }
 
+ErrorCode VerifyTree(Tree* tree) // TODO: make proper verify 
+{
+    size_t count = 0;
+    _checkTreeLinks(tree, tree->root, &count);
 
+    return OK;
+} 
 
-ErrorCode PrintTree(Node* node, FILE* outFile) // TODO: create tree with txt file
+ErrorCode DumpTreeTxt(Tree* tree, const char* filename)
+{
+    myOpen(filename, "w+", outFile);
+
+    _dumpTreeTxt(tree->root, outFile);
+
+    myClose(outFile);
+
+    return OK;
+}
+
+#define dumpText(...) fprintf(outFile, __VA_ARGS__);
+
+static ErrorCode _dumpTreeTxt(Node* node, FILE* outFile) // TODO: create tree with txt file
 {
     AssertSoft(outFile, UNABLE_TO_OPEN_FILE);
 
     if (node == NULL)
     {
-        fprintf(outFile, "nil ");
+        dumpText("nil ");
+
         return OK;
     }
 
-    fprintf(outFile, "( ");
+    dumpText("( "SPECIFIER" ", node->data); 
 
-    fprintf(outFile, ""SPECIFIER" ", node->data); 
+    _dumpTreeTxt(node->left, outFile);
 
-    PrintTree(node->left, outFile);
+    _dumpTreeTxt(node->right, outFile);
 
-    PrintTree(node->right, outFile);
-
-    fprintf(outFile, ") ");
+    dumpText(") ");
 
     return OK;
 }
+
+#undef dumpText
 
 #define FONT_COLOR "\"#000000\""
 
@@ -188,7 +159,7 @@ ErrorCode PrintTree(Node* node, FILE* outFile) // TODO: create tree with txt fil
 
 #define DUMP_NAME "\"Tree Dump\""
 
-#define SHAPE "\"circle\""
+#define SHAPE "\"Mrecord\""
 
 #define STYLE "\"filled\""
 
@@ -238,7 +209,7 @@ static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it mo
 { 
     if (node->left == NULL && node->right == NULL)
     {
-        dumpGraph(" \"" SPECIFIER "\" [shape = \"record\", fillcolor = "BACKGROUND_CHILD_COLOR"," 
+        dumpGraph(" \"" SPECIFIER "\" [shape = "SHAPE", fillcolor = "BACKGROUND_CHILD_COLOR"," 
                   " label = \"{<name>" SPECIFIER " | parent\\n%p | <f0> address\\n%p|"
                   " {<left>left\\n%p | <right>right\\n%p\\n}}\"];\n", 
                   node->data,
@@ -247,7 +218,7 @@ static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it mo
     }    
     else
     {
-        dumpGraph(" \"" SPECIFIER "\" [shape = \"record\"," 
+        dumpGraph(" \"" SPECIFIER "\" [shape = "SHAPE"," 
                   " label = \"{<name>" SPECIFIER " | parent\\n%p | <f0> address\\n%p|"
                   " {<left>left\\n%p | <right>right\\n%p\\n}}\"];\n",
                   node->data, 
@@ -297,10 +268,4 @@ static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it mo
     return OK;
 }
 
-static ErrorCode verifyTree(Tree* tree) // TODO: make proper verify 
-{
-    size_t count = 0;
-    checkTreeLinks(tree, tree->root, &count);
-
-    return OK;
-} 
+#undef dumpGraph

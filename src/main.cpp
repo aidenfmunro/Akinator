@@ -7,11 +7,7 @@ int main(void)
 
     ConstructTree(&tree, "tree.txt");
 
-    FILE* fp = fopen("out.txt", "w+");
-
-    PrintTree(tree.root, fp);
-
-    fclose(fp);
+    DumpTreeTxt(&tree, "out.txt");
 
     DumpTreeGraph(tree.root);
 

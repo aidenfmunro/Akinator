@@ -36,12 +36,6 @@ typedef int ErrorCode;
     const int MIN_SIZE_STR  = 7;
 #endif
 
-struct String
-{
-    char* string;
-    size_t length;
-};
-
 struct Node
 {
     NodeElem_t data;
@@ -76,21 +70,15 @@ enum Error
     SYNTAX_ERROR
 };
 
-enum Side
-{
-    LEFT,
-    RIGHT
-};
-
 ErrorCode CreateTree(Tree* tree);
 
 ErrorCode DestroyTree(Tree* tree);
 
-ErrorCode PrintTree(Node* node, FILE* outFile);
-
 ErrorCode DumpTreeGraph(Node* node);
 
-Node* Insert(Tree* tree, Node* node, NodeElem_t data, Side side);
+ErrorCode DumpTreeTxt(Tree* tree, const char* filename);
+
+ErrorCode VerifyTree(Tree* tree);
 
 ErrorCode deleteNode(Node* node);
 
