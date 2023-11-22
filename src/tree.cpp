@@ -8,7 +8,7 @@ const int MAX_COMMAND_LENGTH = 256;
 
 const int MAX_FILENAME_LENGTH = 256;
 
-static ErrorCode printTreeGraph(Node* node, FILE* outFile);
+static ErrorCode _dumpTreeDot(Node* node, FILE* outFile);
 
 static ErrorCode verifyTree(Tree* tree);
 
@@ -217,7 +217,7 @@ ErrorCode DumpTreeGraph(Node* node)
               "  rankdir   = "RANK";\n\n"
               "  label     = "DUMP_NAME";\n");
 
-    printTreeGraph(node, outFile);
+    _dumpTreeDot(node, outFile);
 
     dumpGraph("  }");
 
@@ -234,7 +234,7 @@ ErrorCode DumpTreeGraph(Node* node)
     return OK;
 }
 
-static ErrorCode printTreeGraph(Node* node, FILE* outFile) // TODO: wtf make it more clean, // create_node, connect_node
+static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it more clean, // create_node, connect_node
 { 
     if (node->left == NULL && node->right == NULL)
     {
@@ -272,7 +272,7 @@ static ErrorCode printTreeGraph(Node* node, FILE* outFile) // TODO: wtf make it 
                       node->left->data, node->left->parent->data);
         }
 
-        printTreeGraph(node->left, outFile); // TODO: get rid off copy paste bruh
+        _dumpTreeDot(node->left, outFile); // TODO: get rid off copy paste bruh
     }
 
     if (node->right != NULL)
@@ -291,7 +291,7 @@ static ErrorCode printTreeGraph(Node* node, FILE* outFile) // TODO: wtf make it 
                       node->data, node->right->data, node->right->data, node->right->parent->data);
         }
 
-        printTreeGraph(node->right, outFile);
+        _dumpTreeDot(node->right, outFile);
     }
     
     return OK;
