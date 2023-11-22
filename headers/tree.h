@@ -88,11 +88,9 @@ ErrorCode DestroyTree(Tree* tree);
 
 ErrorCode PrintTree(Node* node, FILE* outFile);
 
-ErrorCode DumpTreeGraph(Node* node, const char* filename);
+ErrorCode DumpTreeGraph(Node* node);
 
 Node* Insert(Tree* tree, Node* node, NodeElem_t data, Side side);
-
-ErrorCode PrintTree(Node* node, FILE* outFile);
 
 ErrorCode deleteNode(Node* node);
 

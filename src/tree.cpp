@@ -2,6 +2,12 @@
 #include "stackfuncs.h"
 #include "utils.h"
 
+static int DUMP_NUM = 0;
+
+const int MAX_COMMAND_LENGTH = 256;
+
+const int MAX_FILENAME_LENGTH = 256;
+
 static ErrorCode printTreeGraph(Node* node, FILE* outFile);
 
 static ErrorCode verifyTree(Tree* tree);
@@ -153,6 +159,8 @@ ErrorCode searchNode(const char* name, Node* node, Stack* path)
 
 ErrorCode PrintTree(Node* node, FILE* outFile) // TODO: create tree with txt file
 {
+    AssertSoft(outFile, UNABLE_TO_OPEN_FILE);
+
     if (node == NULL)
     {
         fprintf(outFile, "nil ");
@@ -172,49 +180,96 @@ ErrorCode PrintTree(Node* node, FILE* outFile) // TODO: create tree with txt fil
     return OK;
 }
 
-ErrorCode DumpTreeGraph(Node* node, const char* filename)
-{
-    FILE* outFile = fopen(filename, "w+");
+#define FONT_COLOR "\"#000000\""
 
-    fprintf(outFile, "  digraph tree"
-                     "  {\n"
-                     "  node [shape = \"circle\", style = \"filled\", fillcolor = \"blue\", fontcolor = \"#FFFFFF\", margin = \"0.01\"];\n"
-                     "  rankdir = \"TB\";\n\n"
-                     "  label = \"Tree Dump\";\n");
+#define BACKGROUND_PARENT_COLOR "\"aqua\""
+
+#define BACKGROUND_CHILD_COLOR "\"coral\""
+
+#define DUMP_NAME "\"Tree Dump\""
+
+#define SHAPE "\"circle\""
+
+#define STYLE "\"filled\""
+
+#define SPACE_BETWEEN_CONTENTS "\"0.075\""
+
+#define RANK "\"TB\""
+
+#define dumpGraph(...) fprintf(outFile, __VA_ARGS__);
+
+ErrorCode DumpTreeGraph(Node* node)
+{
+    char filename[MAX_FILENAME_LENGTH] = "";
+
+    sprintf(filename, "log/dot/treegraph_%d.dot", DUMP_NUM);
+
+    myOpen(filename, "w", outFile);
+
+    dumpGraph("  digraph tree"
+              "  {\n"
+              "  node[ "
+              "  shape     = "SHAPE"," 
+              "  style     = "STYLE"," 
+              "  fillcolor = "BACKGROUND_PARENT_COLOR"," 
+              "  fontcolor = "FONT_COLOR","
+              "  margin    = "SPACE_BETWEEN_CONTENTS"];\n"
+              "  rankdir   = "RANK";\n\n"
+              "  label     = "DUMP_NAME";\n");
 
     printTreeGraph(node, outFile);
 
-    fprintf(outFile, "  }");
+    dumpGraph("  }");
 
-    fclose(outFile);
+    myClose(outFile);
+
+    char command[MAX_COMMAND_LENGTH] = "";
+
+    sprintf(command, "dot -Tpng log/dot/treegraph_%d.dot -o log/img/treeimg_%d.png", DUMP_NUM, DUMP_NUM);
+
+    system(command);
+
+    DUMP_NUM++;
 
     return OK;
 }
 
-// #define outFile "graph.txt"
-
-// #define dumpGraph(...) fprintf(outFile, __VA_ARGS__);
-
-static ErrorCode printTreeGraph(Node* node, FILE* outFile) // TODO: wtf make it more clean
-{ // create_node, connect_node
+static ErrorCode printTreeGraph(Node* node, FILE* outFile) // TODO: wtf make it more clean, // create_node, connect_node
+{ 
     if (node->left == NULL && node->right == NULL)
-        fprintf(outFile, "  \"" SPECIFIER "\" [shape = \"record\", fillcolor = \"red\", label = \"{" SPECIFIER " | parent\\n%p | <f0> pos\\n%p| left\\n%p | right\\n%p\\n}\"];\n", node->data, node->data, node->parent, node, node->left, node->right);
+    {
+        dumpGraph(" \"" SPECIFIER "\" [shape = \"record\", fillcolor = "BACKGROUND_CHILD_COLOR"," 
+                  " label = \"{<name>" SPECIFIER " | parent\\n%p | <f0> address\\n%p|"
+                  " {<left>left\\n%p | <right>right\\n%p\\n}}\"];\n", 
+                  node->data,
+                  node->data, node->parent, node,
+                  node->left, node->right);
+    }    
     else
-        fprintf(outFile, "  \"" SPECIFIER "\" [shape = \"record\", label = \"{" SPECIFIER " | parent\\n%p | <f0> pos\\n%p| left\\n%p | right\\n%p\\n}\"];\n", node->data, node->data, node->parent, node, node->left, node->right);
-
+    {
+        dumpGraph(" \"" SPECIFIER "\" [shape = \"record\"," 
+                  " label = \"{<name>" SPECIFIER " | parent\\n%p | <f0> address\\n%p|"
+                  " {<left>left\\n%p | <right>right\\n%p\\n}}\"];\n",
+                  node->data, 
+                  node->data, node->parent, node, 
+                  node->left, node->right);
+    }
+    
     if (node->left != NULL)
     {
         if (node->left->parent == node)
         {
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->data, node->left->data);
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->left->data, node->data);
+            dumpGraph("  \"" SPECIFIER "\":left->\"" SPECIFIER "\";\n", node->data, node->left->data);
+            // fprintf(outFile, "  \"" SPECIFIER "\":name->\"" SPECIFIER "\";\n", node->left->data, node->data);
         }
         else
         {
-            fprintf(outFile, "  edge [color=\"#FE6200\"];\n");
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->data, node->left->data);
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->left->data, node->left->parent->data); // dump(...)
-            fprintf(outFile, "  edge [color=\"#000000\"];\n");
+            dumpGraph("  edge [color=\"#FE6200\"];\n"
+                      "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n"
+                      "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n"
+                      "  edge [color=\"#000000\"];\n",
+                      node->data, node->left->data,
+                      node->left->data, node->left->parent->data);
         }
 
         printTreeGraph(node->left, outFile); // TODO: get rid off copy paste bruh
@@ -224,15 +279,16 @@ static ErrorCode printTreeGraph(Node* node, FILE* outFile) // TODO: wtf make it 
     {
         if (node->right->parent == node)
         {
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->data, node->right->data);
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->right->data, node->data);
+            dumpGraph("  \"" SPECIFIER "\":right->\"" SPECIFIER "\";\n", node->data, node->right->data);
+           //  fprintf(outFile, "  \"" SPECIFIER "\":name->\"" SPECIFIER "\";\n", node->right->data, node->data);
         }
         else
         {
-            fprintf(outFile, "  edge [color=\"#FE6200\"];\n");
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->data, node->right->data);
-            fprintf(outFile, "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n", node->right->data, node->right->parent->data);
-            fprintf(outFile, "  edge [color=\"#000000\"];\n");
+            dumpGraph("  edge [color=\"#FE6200\"];\n"
+                      "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n" 
+                      "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n",
+                      "  edge [color=\"#000000\"];\n", 
+                      node->data, node->right->data, node->right->data, node->right->parent->data);
         }
 
         printTreeGraph(node->right, outFile);

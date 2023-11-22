@@ -6,7 +6,6 @@ ErrorCode ConstructTree  (Tree* tree, const char* basefilename);
 Node*     _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
 Node*     _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*     _createNode(NodeElem_t data, Node* left, Node* right);
-ErrorCode _connectWithParent(Node* node);
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 {
@@ -27,8 +26,6 @@ ErrorCode ConstructTree(Tree* tree, const char* basefilename)
     size_t curTokenNum = 0;
 
     tree->root = _recursiveReadTree(tree, &base, &curTokenNum);
-
-    _connectWithParent(tree->root);
 
     DestroyText(&base);
 
@@ -100,28 +97,14 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
 
     newNode->data = data;
 
+    if (left)
+        left->parent  = newNode; // TODO: acquire parents 
+    if (right)
+        right->parent = newNode;
+    
     newNode->left = left;
-
+    
     newNode->right = right;
 
     return newNode;    
-}
-
-ErrorCode _connectWithParent(Node* node)
-{
-    if (node->left)
-    {
-        node->left->parent = node;
-
-        _connectWithParent(node->left);
-    }
-
-    if (node->right)
-    {
-        node->right->parent = node;
-
-        _connectWithParent(node->right);
-    }
-
-    return OK;
 }

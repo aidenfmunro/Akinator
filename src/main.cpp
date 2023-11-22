@@ -13,7 +13,7 @@ int main(void)
 
     fclose(fp);
 
-    DumpTreeGraph(tree.root, "treegraph.dot");
+    DumpTreeGraph(tree.root);
 
     DestroyTree(&tree);
 
