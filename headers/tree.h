@@ -67,7 +67,8 @@ enum Error
     UNKNOWN_POSITION,
     UNABLE_TO_OPEN_FILE,
     UNRECOGNISED_TOKEN,
-    SYNTAX_ERROR
+    SYNTAX_ERROR,
+    UNKNOWN_NAME
 };
 
 // ErrorCode CreateTree(Tree* tree);

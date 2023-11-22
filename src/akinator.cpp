@@ -7,7 +7,7 @@ ErrorCode ConstructTree  (Tree* tree, const char* basefilename);
 Node*     _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
 Node*     _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*     _createNode(NodeElem_t data, Node* left, Node* right);
-Stack _searchName(Tree* tree, const char* name, Stack path);
+ErrorCode  _searchName(Tree* tree, const char* name, Stack* path);
 Node* _searchNode(const char* name, Node* node);
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
@@ -122,14 +122,16 @@ ErrorCode definition(Tree* tree, const char* name)
 
     CreateStack(path);
 
-    path = _searchName(tree, name, path);
+    _searchName(tree, name, &path);
 
     Node* curNode = tree->root;
 
-    for (size_t i = 0; i < path.size; i++)
-    {
-        printf("%s -> ", curNode->data);
+    printf("%d\n", path.size);
 
+    printf("%s ", curNode->data);
+
+    for (size_t i = 0; i <= path.size; i++)
+    {
         int turn = Pop(&path);
 
         if (turn == 1)
@@ -140,6 +142,8 @@ ErrorCode definition(Tree* tree, const char* name)
         {
             curNode = curNode->left;
         }
+
+        printf("-> %s ", curNode->data);
     }
 
     DestroyStack(&path);
@@ -147,7 +151,7 @@ ErrorCode definition(Tree* tree, const char* name)
     return OK;
 }
 
-Stack _searchName(Tree* tree, const char* name, Stack path)
+ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
 {
     Node* curNode = _searchNode(name, tree->root);
 
@@ -155,19 +159,20 @@ Stack _searchName(Tree* tree, const char* name, Stack path)
 
     while (curNode != tree->root)
     {
-        if      (curNode->parent == curNode->parent->left)
+        if      (curNode == curNode->parent->left)
         {
-            Push(&path, 0);
+            Push(path, 0);
         }
-        else if (curNode->parent == curNode->parent->right)
+
+        else if (curNode == curNode->parent->right)
         {
-            Push(&path, 1);
+            Push(path, 1);
         }
 
         curNode = curNode->parent;
     }
 
-    return path;
+    return OK;
 }
 
 Node* _searchNode(const char* name, Node* node)
@@ -178,11 +183,6 @@ Node* _searchNode(const char* name, Node* node)
     {
         return NULL;
     }    
-
-    if (node)
-    {
-        printf("%s, %s, %d\n", node->data, name, strcmp(name, node->data));
-    }
 
     if (strcmp(node->data, name) == 0)
     {
