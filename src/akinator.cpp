@@ -109,7 +109,7 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
     if (right)
         right->parent = newNode;
     
-    newNode->left = left;
+    newNode->left  = left;
     
     newNode->right = right;
 
@@ -122,7 +122,7 @@ ErrorCode definition(Tree* tree, const char* name)
 
     CreateStack(path);
 
-    _searchName(tree, name, &path);
+    tree->error = _searchName(tree, name, &path);
 
     Node* curNode = tree->root;
 
@@ -155,7 +155,8 @@ ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
 {
     Node* curNode = _searchNode(name, tree->root);
 
-    printf("found: %p\n", curNode);
+    if (!curNode)
+        return UNKNOWN_NAME;
 
     while (curNode != tree->root)
     {
