@@ -1,5 +1,6 @@
 #include "akinator.h"
 #include "textfuncs.h"
+#include "stackfuncs.h"
 #include "utils.h"
 
 ErrorCode ConstructTree  (Tree* tree, const char* basefilename);
@@ -78,6 +79,8 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
 
     Node* newNode      = _createNode(data, leftSubTree, rightSubTree);
 
+    tree->size++; 
+
     token = &base->tokens[(*curTokenNum)++];
 
     const char* closeBracket = strchr(token->string, ')');
@@ -99,7 +102,7 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
     newNode->data = data;
 
     if (left)
-        left->parent  = newNode; // TODO: acquire parents 
+        left->parent  = newNode; 
         
     if (right)
         right->parent = newNode;
@@ -109,4 +112,24 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
     newNode->right = right;
 
     return newNode;    
+}
+
+Node* _searchNode(const char* name, Node* node)
+{
+    if (strcmp(node->data, name) == 0)
+    {
+        return node; 
+    }
+
+    if (node->left)
+    {
+        _searchNode(name, node->left);
+    }
+
+    if (node->right)
+    {
+        _searchNode(name, node->right);
+    }
+
+    return NULL;
 }

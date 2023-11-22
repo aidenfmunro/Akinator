@@ -14,6 +14,8 @@ static ErrorCode _dumpTreeTxt    (Node* node, FILE* outFile);
 
 static ErrorCode _checkTreeLinks (Tree* tree, Node* node, size_t* counter);
 
+/* |---------> REFACTOR <-----------|
+
 ErrorCode CreateTree(Tree* tree)
 {
     AssertSoft(tree, NULL_PTR);
@@ -39,6 +41,8 @@ ErrorCode CreateTree(Tree* tree)
 
     return OK;
 }
+
+*/
 
 ErrorCode deleteNode(Node* node)
 {

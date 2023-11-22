@@ -11,6 +11,8 @@ int main(void)
 
     DumpTreeGraph(tree.root);
 
+    printf("%d\n", tree.size);
+
     DestroyTree(&tree);
 
     return OK;
