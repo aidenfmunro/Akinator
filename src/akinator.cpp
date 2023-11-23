@@ -71,6 +71,7 @@ ErrorCode ChooseMode(char key, const char* basefilename)
     {
         case GUESS:
         {
+            Guess(basefilename);
             break;
         }
         case DEFINITION:
@@ -278,11 +279,45 @@ ErrorCode Guess(const char* basefilename)
 
     ConstructTree(&tree, basefilename);
 
+    Node* curNode = tree.root;
 
+    char answer = 0;
 
-    char answer = getKey();
+    while (curNode)
+    {
+        printf("%s [y] or [n]\n", curNode->data);
+
+        answer = getKey();
+
+        if (answer == NO)
+        {
+            if (curNode->left->right == NULL && curNode->left->left == NULL)
+            {   
+                printf("What you are looking for doesn't exist. Would you like to add it?");
+            }
+            else
+            {
+                curNode = curNode->left;
+            }
+        }
+
+        else if (answer == YES)
+        {
+            if (curNode->right->right == NULL && curNode->right->left == NULL)
+            {
+                printf("found it! -> %s", curNode->right->data);
+                break;
+            }
+            else
+            {
+                curNode = curNode->right;
+            }
+        }
+    }
 
     DestroyTree(&tree);
+
+    return OK;
     
 }
 
