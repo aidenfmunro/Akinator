@@ -11,6 +11,7 @@ Node*      _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _createNode        (NodeElem_t data, Node* left, Node* right);
 ErrorCode  _searchName        (Tree* tree, const char* name, Stack* path);
 Node*      _searchNode        (const char* name, Node* node);
+ErrorCode  addQuestion        (Tree* tree, Node* node, const char* basefilename);
 
 #define BOLD  "\e[1m"
 #define RED     "\x1b[31m"
@@ -49,7 +50,6 @@ ErrorCode ProcessMode(const char* basefilename)
 Key getKey(void)
 {
     char key = 0;
-    bufferCleaner();
 
     while ((key != GUESS     ) &&
            (key != DEFINITION) &&
@@ -288,13 +288,9 @@ ErrorCode Guess(const char* basefilename)
 
     while (curNode)
     {
-        printf("%s [y] or [n] \n", curNode->data);
-
-        answer = getKey();
-
-        if (curNode->left->right == NULL && curNode->left->left == NULL)
+        if (curNode->right == NULL && curNode->left == NULL)
         {   
-            printf("Is it %s?\n", curNode->left->data);
+            printf("Is it %s?\n", curNode->data);
 
             answer = getKey();
 
@@ -310,16 +306,22 @@ ErrorCode Guess(const char* basefilename)
                 }
                 else
                 {
-                    // add node
+                    addQuestion(&tree, curNode, basefilename);
                 }
             }
             else if (answer == YES)
             {
                 printf(YELLOW "Gotcha!\n" COLOR_RESET);
             }
+
             break;
         }
-        else if (answer == NO)
+
+        printf("%s [y] or [n] \n", curNode->data);
+
+        answer = getKey();
+
+        if (answer == NO)
         {
             curNode = curNode->left;
         }
@@ -329,17 +331,54 @@ ErrorCode Guess(const char* basefilename)
         }
     }
     
-    DestroyTree(&tree);
+    // DestroyTree(&tree);
 
     return OK;
 }
 
-ErrorCode addNode(Tree* tree)
+ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO: rename to add question
 {
+    AssertSoft(tree, NULL_PTR);
+    AssertSoft(node, NULL_PTR);
+    AssertSoft(basefilename, NULL_PTR);
 
+    printf("what's the difference between %s and your answer?"
+            BOLD " (write in question form)" COLOR_RESET "\n\n", node->data);
+
+    char question[MAX_STR_SIZE] = {};
+
+    char answer[MAX_STR_SIZE] = {};
+
+    scanf("%s", question);
+
+    SafeCalloc(tempDataAnswer, MAX_STR_SIZE, char, NO_MEMORY);
+
+    strcpy(tempDataAnswer, answer);
+
+    printf("what's your answer? \n\n");
+    
+    scanf("%s", answer);
+
+    SafeCalloc(tempDataQuestion, MAX_STR_SIZE, char, NO_MEMORY);
+
+    strcpy(tempDataQuestion, question);
+
+    Node* tempNode2 = _createNode(node->data, NULL, NULL);
+
+    node->left = tempNode2;
+
+    node->data = tempDataQuestion;
+
+    Node* tempNode1 = _createNode(answer, NULL, NULL);
+
+    node->right = tempNode1;
+
+    DumpTreeTxt(tree, basefilename);
+
+    // DumpTreeGraph(tree->root);
+
+    return OK;
 }
-
-
 
 ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
 {
