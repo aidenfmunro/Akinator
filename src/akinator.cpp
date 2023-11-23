@@ -327,19 +327,16 @@ ErrorCode Guess(const char* basefilename)
         {
             curNode = curNode->right;
         }
+    }
     
-    return OK;
-}
-
     DestroyTree(&tree);
 
     return OK;
-    
 }
 
 ErrorCode addNode(Tree* tree)
 {
-    
+
 }
 
 
