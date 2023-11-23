@@ -3,12 +3,108 @@
 #include "stackfuncs.h"
 #include "utils.h"
 
+const int MAX_KEY_SIZE = 256;
+
 ErrorCode  ConstructTree      (Tree* tree, const char* basefilename);
 Node*      _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _createNode        (NodeElem_t data, Node* left, Node* right);
 ErrorCode  _searchName        (Tree* tree, const char* name, Stack* path);
 Node*      _searchNode        (const char* name, Node* node);
+
+#define BOLD  "\e[1m"
+#define RED     "\x1b[31m"
+#define GREEN   "\x1b[32m"
+#define YELLOW  "\x1b[33m"
+#define BLUE    "\x1b[34m"
+#define MAGENTA "\x1b[35m"
+#define CYAN    "\x1b[36m"
+#define COLOR_RESET   "\x1b[0m"
+
+ErrorCode Menu(const char* basefilename)
+{
+    AssertSoft(basefilename, NULL_PTR);
+
+    printf("\n" BOLD  "Добро пожаловать в игру Акинатор!                    \n\n" COLOR_RESET
+                GREEN "Выберите соответствующий режим:                      \n\n" COLOR_RESET
+                      "Отгадывание:          ["BLUE"g"COLOR_RESET"]         \n\n"
+                      "Определение:          ["BLUE"d"COLOR_RESET"]         \n\n"
+                      "Сравнение объектов:   ["BLUE"c"COLOR_RESET"]         \n\n"
+                      "Просмотр базы данных: ["BLUE"l"COLOR_RESET"]         \n\n"
+                      "Выход:                ["BLUE"q"COLOR_RESET"]         \n\n");
+
+    return ProcessMode(basefilename);
+}
+
+ErrorCode ProcessMode(const char* basefilename)
+{
+    AssertSoft(basefilename, NULL_PTR);
+
+    int key = getKey();
+
+    return ChooseMode(key);
+
+}
+
+Key getKey(void)
+{
+    char key = 0;
+
+    scanf("%c", &key);
+    getchar(); 
+
+    while ((key != GUESS     ) &&
+           (key != DEFINITION) &&
+           (key != COMPARE   ) &&
+           (key != DATABASE  ) &&
+           (key != QUIT      ) &&
+           (key != YES       ) &&
+           (key != NO        )) 
+    {
+        printf("Unknown key: %c! Please try again\n", key);
+        
+        scanf("%c", &key);
+        getchar(); 
+    }
+
+    return key;
+}
+
+
+ErrorCode ChooseMode(char key)
+{
+    switch (key)
+    {
+        case GUESS:
+        {
+            break;
+        }
+        case DEFINITION:
+        {
+            break;
+        }
+        case COMPARE:
+        {
+            break;
+        }
+        case DATABASE:
+        {
+            break;
+        }
+        case QUIT:
+        {
+            printf("Goodbye!\n");
+            return QUIT;
+            break;
+        }
+        
+        default:
+            printf("Unknown mode: %c! Please try again\n", key);
+            break;
+    }
+
+    return OK;
+}
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 {
@@ -155,6 +251,10 @@ ErrorCode getDefinition(Tree* tree, const char* name)
 
 ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
 {
+    AssertSoft(tree, NULL_PTR);
+    AssertSoft(name, NULL_PTR);
+    AssertSoft(path, NULL_PTR);
+
     Node* curNode = _searchNode(name, tree->root);
 
     if (!curNode)

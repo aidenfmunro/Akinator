@@ -69,7 +69,7 @@ ErrorCode DestroyTree(Tree* tree)
 
     deleteNode(tree->root);
 
-    tree->root = NULL;
+    tree->root = NULL; // ?
 
     tree->error = 0;
 
@@ -210,7 +210,9 @@ ErrorCode DumpTreeGraph(Node* node)
 }
 
 static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it more clean, // create_node, connect_node
-{ 
+{
+    AssertSoft(node, NULL_PTR);
+    
     if (node->left == NULL && node->right == NULL)
     {
         dumpGraph(" \"" SPECIFIER "\" [shape = "SHAPE", fillcolor = "BACKGROUND_CHILD_COLOR"," 

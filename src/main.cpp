@@ -3,6 +3,8 @@
 
 int main(void)
 {
+    Menu("ss");
+    
     Tree tree = {};
 
     ConstructTree(&tree, "tree.txt");
@@ -13,7 +15,7 @@ int main(void)
 
     printf("%d\n", tree.size);
 
-    getDefinition(&tree, "alexey");
+    getDefinition(&tree, "aiden");
 
     DestroyTree(&tree);
 

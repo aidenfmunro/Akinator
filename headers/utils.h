@@ -41,6 +41,8 @@ if (!(expression))                                                              
         fclose(fileVar);    
 
 #define myRead(filename, mode, filevar)        \
+
+int checkInput(void);
     
 
 #endif 
