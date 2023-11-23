@@ -26,12 +26,15 @@ ErrorCode Menu(const char* basefilename);
 
 ErrorCode ProcessMode(const char* basefilename);
 
-ErrorCode ChooseMode(char key);
+ErrorCode Definition(const char* basefilename);
+
+ErrorCode Guess(const char* basefilename);
+
+ErrorCode ChooseMode(char key, const char* basefilename);
 
 Key getKey();
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename);
 
-ErrorCode getDefinition(Tree* tree, const char* name);
 
 #endif

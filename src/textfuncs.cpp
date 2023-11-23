@@ -54,14 +54,14 @@ char* const* getTokenPointers(Text *text)
     
     *lineptrs = text->buffer;
 
-    char* textptr = strchr(text->buffer, ' '); // space for Akinator 
+    char* textptr = strchr(text->buffer, '\n'); // space for Akinator 
 
     while (textptr != NULL)
       {
         *textptr = '\0';
         lineptrs++;
         *lineptrs = textptr + 1;
-        textptr = strchr(textptr + 1, ' '); 
+        textptr = strchr(textptr + 1, '\n'); 
       }
 
     lineptrs -= (text->numTokens - 1);
@@ -77,7 +77,7 @@ char* parseBuf(Text* text, const char* filename)
 
     char* buffer = (char*)calloc(text->size + 2, sizeof(char));
     fread(buffer, sizeof(char), text->size, fp);
-    buffer[text->size - 1] = '\0'; // -1 for Akinator (remove last space token)
+    buffer[text->size] = '\0'; // -1 for Akinator (remove last space token)
   
     fclose(fp);
 
@@ -100,7 +100,7 @@ size_t countTokens(const Text* text)
 
     size_t tokens = 1;
     for (size_t i = 0; i < text->size; i++)
-        if (text->buffer[i] == ' ') // space for Akinator
+        if (text->buffer[i] == '\n') // space for Akinator
             tokens++;
 
     return tokens;

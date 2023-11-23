@@ -3,19 +3,15 @@
 
 int main(void)
 {
-    Menu("ss");
+    Menu("tree1.txt");
     
     Tree tree = {};
 
-    ConstructTree(&tree, "tree.txt");
+    ConstructTree(&tree, "tree1.txt");
 
     DumpTreeTxt(&tree, "out.txt");
 
     DumpTreeGraph(tree.root);
-
-    printf("%d\n", tree.size);
-
-    getDefinition(&tree, "aiden");
 
     DestroyTree(&tree);
 

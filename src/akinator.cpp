@@ -42,16 +42,13 @@ ErrorCode ProcessMode(const char* basefilename)
 
     int key = getKey();
 
-    return ChooseMode(key);
+    return ChooseMode(key, basefilename);
 
 }
 
 Key getKey(void)
 {
     char key = 0;
-
-    scanf("%c", &key);
-    getchar(); 
 
     while ((key != GUESS     ) &&
            (key != DEFINITION) &&
@@ -61,17 +58,14 @@ Key getKey(void)
            (key != YES       ) &&
            (key != NO        )) 
     {
+        scanf("%c%*c", &key);
         printf("Unknown key: %c! Please try again\n", key);
-        
-        scanf("%c", &key);
-        getchar(); 
     }
 
     return key;
 }
 
-
-ErrorCode ChooseMode(char key)
+ErrorCode ChooseMode(char key, const char* basefilename)
 {
     switch (key)
     {
@@ -81,6 +75,7 @@ ErrorCode ChooseMode(char key)
         }
         case DEFINITION:
         {
+            Definition(basefilename);
             break;
         }
         case COMPARE:
@@ -119,8 +114,9 @@ ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 
     for (size_t i = 0; i < base.numTokens; i++)
     {
-        printf("token [%d]: %s\n", i, base.tokens[i].string);
+        printf("token [%d]: %s, %d\n", i, base.tokens[i].string, base.tokens[i].length);
     }
+    
 
     size_t curTokenNum = 0;
 
@@ -164,12 +160,16 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
     int countChars = 0;
 
     SafeCalloc(data, token->length + 1, char, NULL);
+    
+    strcpy(data, token->string);
 
-    if (sscanf(token->string, SPECIFIER "%n", data, &countChars) != 1 || StringIsEmpty(token))
+    if (StringIsEmpty(token))
     {
         tree->error = UNRECOGNISED_TOKEN;
-        return NULL;
+        AssertSoft(! tree->error, NULL);
     }
+
+    printf("%s\n", data);
 
     Node* leftSubTree  = _recursiveReadTree(tree, base, curTokenNum);
 
@@ -212,41 +212,78 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right)
     return newNode;    
 }
 
-ErrorCode getDefinition(Tree* tree, const char* name)
+ErrorCode Definition(const char* basefilename)
 {
+    Tree tree = {};
+
+    ConstructTree(&tree, basefilename);
+
     Stack path = {};
+
+    SafeCalloc(name, MAX_STR_SIZE, char, NULL_PTR);
+
+    printf("Type in the name that you want to find:\n\n");
+    scanf("%s", name);
+    printf("\n");
 
     CreateStack(path);
 
-    tree->error = _searchName(tree, name, &path);
+    tree.error = _searchName(&tree, name, &path);
 
-    AssertSoft(! tree->error, UNKNOWN_NAME);
-
-    Node* curNode = tree->root;
-
-    printf("%d\n", path.size);
-
-    printf("%s ", curNode->data);
-
-    for (size_t i = 0; i <= path.size; i++)
+    if (tree.error == UNKNOWN_NAME)
     {
-        int turn = Pop(&path);
-
-        if (turn == 1)
-        {
-            curNode = curNode->right;
-        }
-        else if (turn == 0)
-        {
-            curNode = curNode->left;
-        }
-
-        printf("-> %s ", curNode->data);
+        printf("The name doesn't exist!\n");
     }
+    else
+    {
+        Node* curNode = tree.root;
+
+        printf("%s ", curNode->data);
+
+        for (size_t i = 0; i <= path.size; i++)
+        {
+            int turn = Pop(&path);
+
+            if (turn == 1)
+            {
+                curNode = curNode->right;
+            }
+            else if (turn == 0)
+            {
+                curNode = curNode->left;
+            }
+
+            printf("-> %s ", curNode->data);
+        }
+
+        printf("\n\n");
+    }
+
+    free(name);
+
+    DestroyTree(&tree);
 
     DestroyStack(&path);
 
+    Menu(basefilename);
+
     return OK;
+}
+
+ErrorCode Guess(const char* basefilename)
+{
+    AssertSoft(basefilename, NULL_PTR);
+
+    Tree tree = {};
+
+    ConstructTree(&tree, basefilename);
+
+
+
+    char answer = getKey();
+
+    DestroyTree(&tree);
+    
 }
 
 ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
@@ -286,7 +323,6 @@ Node* _searchNode(const char* name, Node* node)
     {
         return NULL;
     }    
-
     if (strcmp(node->data, name) == 0)
     {
         return node;
