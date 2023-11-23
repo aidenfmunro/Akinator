@@ -292,81 +292,57 @@ ErrorCode Guess(const char* basefilename)
 
         answer = getKey();
 
-        if (answer == NO)
-        {
-            if (curNode->left->right == NULL && curNode->left->left == NULL)
-            {   
-                printf("Is it %s?\n", curNode->left->data);
+        if (curNode->left->right == NULL && curNode->left->left == NULL)
+        {   
+            printf("Is it %s?\n", curNode->left->data);
+
+            answer = getKey();
+
+            if (answer == NO)
+            {
+                printf("Would you like to add your answer?\n");
 
                 answer = getKey();
 
                 if (answer == NO)
                 {
-                    printf("Would you like to add your answer?\n");
-
-                    answer = getKey();
-
-                    if (answer == NO)
-                    {
-                        Menu(basefilename);
-                    }
-                    else
-                    {
-                        // add node
-                    }
+                    Menu(basefilename);
                 }
-                else if (answer == YES)
+                else
                 {
-                    printf(YELLOW "Gotcha!\n" COLOR_RESET);
+                    // add node
                 }
-                break;
             }
-            else
+            else if (answer == YES)
             {
-                curNode = curNode->left;
+                printf(YELLOW "Gotcha!\n" COLOR_RESET);
             }
+            break;
         }
-
+        else if (answer == NO)
+        {
+            curNode = curNode->left;
+        }
         else if (answer == YES)
         {
-            if (curNode->right->right == NULL && curNode->right->left == NULL)
-            {
-                printf("Is it %s?", curNode->right->data);
-
-                if (answer == NO)
-                {
-                    printf("Would you like to add your answer?\n");
-
-                    answer = getKey();
-
-                    if (answer == NO)
-                    {
-                        Menu(basefilename);
-                    }
-                    else
-                    {
-                        // add node
-                    }
-                }
-                else if (answer == YES)
-                {
-                    printf(YELLOW "Gotcha!\n" COLOR_RESET);
-                }
-
-                break;
-            }
-            else
-            {
-                curNode = curNode->right;
-            }
+            curNode = curNode->right;
         }
-    }
+    
+    return OK;
+}
 
     DestroyTree(&tree);
 
     return OK;
     
 }
+
+ErrorCode addNode(Tree* tree)
+{
+    
+}
+
+
 
 ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
 {
