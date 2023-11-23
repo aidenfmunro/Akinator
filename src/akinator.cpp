@@ -49,6 +49,7 @@ ErrorCode ProcessMode(const char* basefilename)
 Key getKey(void)
 {
     char key = 0;
+    bufferCleaner();
 
     while ((key != GUESS     ) &&
            (key != DEFINITION) &&
@@ -58,7 +59,8 @@ Key getKey(void)
            (key != YES       ) &&
            (key != NO        )) 
     {
-        scanf("%c%*c", &key);
+        scanf("%c", &key);
+        bufferCleaner();
         printf("Unknown key: %c! Please try again\n", key);
     }
 
@@ -111,12 +113,15 @@ ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 
     CreateText(&base, basefilename, NONE);
 
+    // --------> DEBUG INFO
+    /*
     printf("%d\n", base.numTokens);
 
     for (size_t i = 0; i < base.numTokens; i++)
     {
         printf("token [%d]: %s, %d\n", i, base.tokens[i].string, base.tokens[i].length);
     }
+    */
     
 
     size_t curTokenNum = 0;
@@ -169,8 +174,6 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
         tree->error = UNRECOGNISED_TOKEN;
         AssertSoft(! tree->error, NULL);
     }
-
-    printf("%s\n", data);
 
     Node* leftSubTree  = _recursiveReadTree(tree, base, curTokenNum);
 
@@ -285,7 +288,7 @@ ErrorCode Guess(const char* basefilename)
 
     while (curNode)
     {
-        printf("%s [y] or [n]\n", curNode->data);
+        printf("%s [y] or [n] \n", curNode->data);
 
         answer = getKey();
 
@@ -293,7 +296,30 @@ ErrorCode Guess(const char* basefilename)
         {
             if (curNode->left->right == NULL && curNode->left->left == NULL)
             {   
-                printf("What you are looking for doesn't exist. Would you like to add it?");
+                printf("Is it %s?\n", curNode->left->data);
+
+                answer = getKey();
+
+                if (answer == NO)
+                {
+                    printf("Would you like to add your answer?\n");
+
+                    answer = getKey();
+
+                    if (answer == NO)
+                    {
+                        Menu(basefilename);
+                    }
+                    else
+                    {
+                        // add node
+                    }
+                }
+                else if (answer == YES)
+                {
+                    printf(YELLOW "Gotcha!\n" COLOR_RESET);
+                }
+                break;
             }
             else
             {
@@ -305,7 +331,28 @@ ErrorCode Guess(const char* basefilename)
         {
             if (curNode->right->right == NULL && curNode->right->left == NULL)
             {
-                printf("found it! -> %s", curNode->right->data);
+                printf("Is it %s?", curNode->right->data);
+
+                if (answer == NO)
+                {
+                    printf("Would you like to add your answer?\n");
+
+                    answer = getKey();
+
+                    if (answer == NO)
+                    {
+                        Menu(basefilename);
+                    }
+                    else
+                    {
+                        // add node
+                    }
+                }
+                else if (answer == YES)
+                {
+                    printf(YELLOW "Gotcha!\n" COLOR_RESET);
+                }
+
                 break;
             }
             else
@@ -334,7 +381,7 @@ ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
 
     while (curNode != tree->root)
     {
-        if      (curNode == curNode->parent->left)
+        if (curNode == curNode->parent->left)
         {
             Push(path, 0);
         }

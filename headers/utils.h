@@ -43,6 +43,8 @@ if (!(expression))                                                              
 #define myRead(filename, mode, filevar)        \
 
 int checkInput(void);
+
+void bufferCleaner(void);
     
 
 #endif 

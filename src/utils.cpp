@@ -26,3 +26,8 @@ int checkInput(void)
       }
     return 0;
 }
+
+void bufferCleaner(void)
+{
+    while (getchar() != '\n') ;
+}
