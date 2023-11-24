@@ -8,8 +8,7 @@ const int MAX_KEY_SIZE = 256;
 Node*      _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _createNode        (NodeElem_t data, Node* left, Node* right);
-ErrorCode  _searchName        (Tree* tree, const char* name, Stack* path);
-Node*      _searchNode        (const char* name, Node* node, Stack* path);
+bool       _searchNode        (const char* name, Node* node, Stack* path);
 ErrorCode  addQuestion        (Tree* tree, Node* node, const char* basefilename);
 
 #define BOLD  "\e[1m"
@@ -226,32 +225,23 @@ ErrorCode Definition(const char* basefilename)
 
     CreateStack(path);
 
-    _searchNode(name, tree.root, &path);
+    bool isNodeFound = _searchNode(name, tree.root, &path);
 
-    printf("%d\n", path.size);
-
-    if (tree.error == UNKNOWN_NAME) // wrap into function 
+    if (! isNodeFound) // wrap into function 
     {
         printf("The name doesn't exist!\n");
     }
     else
     {
-        Node* curNode = tree.root;
+        Node* curNode = Pop(&path);
+
+        printf("%d\n", path.size);
 
         printf("%s ", curNode->data);
 
-        for (size_t i = 0; i <= path.size; i++)
+        for (size_t i = path.size; i >= 0; i--)
         {
-            int turn = Pop(&path);
-
-            if (turn == 1)
-            {
-                curNode = curNode->right;
-            }
-            else if (turn == 0)
-            {
-                curNode = curNode->left;
-            }
+            curNode = Pop(&path);
 
             printf("-> %s ", curNode->data);
         }
@@ -268,6 +258,26 @@ ErrorCode Definition(const char* basefilename)
     Menu(basefilename);
 
     return OK;
+}
+
+bool _searchNode(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
+{
+    AssertSoft(name, NULL);
+
+    if (! node)
+        return false;
+
+    Push(path, node);
+
+    if (strcmp(node->data, name) == 0)
+        return true;
+
+    if (_searchNode(name, node->left, path) || _searchNode(name, node->right, path))
+        return true;
+
+    Pop(path);
+
+    return false;
 }
 
 ErrorCode Guess(const char* basefilename)
@@ -374,62 +384,4 @@ ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO:
     // DumpTreeGraph(tree->root);
 
     return OK;
-}
-
-ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
-{
-    AssertSoft(tree, NULL_PTR);
-    AssertSoft(name, NULL_PTR);
-    AssertSoft(path, NULL_PTR);
-
-    Node* curNode = _searchNode(name, tree->root, path);
-
-    if (!curNode)
-        return UNKNOWN_NAME;
-
-    while (curNode != tree->root)
-    {
-        if (curNode == curNode->parent->left)
-        {
-            Push(path, 0);
-        }
-
-        else if (curNode == curNode->parent->right)
-        {
-            Push(path, 1);
-        }
-
-        curNode = curNode->parent;
-    }
-
-    return OK;
-}
-
-Node* _searchNode(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
-{
-    AssertSoft(name, NULL);
-
-    printf("%s\n", name);
-    printf("%d\n",path->size);
-
-    if (strcmp(node->data, name) == 0)
-    {
-        return node;
-    }
-
-    if (node->right)
-    {
-        Push(path, 1);
-        return _searchNode(name, node->right, path);
-    }
-
-    if (node->left)
-    {
-        Push(path, 0);
-        return _searchNode(name, node->left, path);
-    }
-
-    Pop(path);
-
-    return NULL;
 }

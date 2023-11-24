@@ -5,10 +5,7 @@
 
 enum ERRORS_STACK
 {
-    OK                  = 0,
-    NO_MEMORY           = 3,
-    STACK_DELETED       = 5,
-    UNABLE_TO_OPEN_FILE = 7
+    STACK_DELETED = 5,
 };
 
 ErrorCode createStack(Stack* stack ON_DEBUG(, char* name))

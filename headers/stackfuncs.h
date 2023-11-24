@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <limits.h>
+#include "tree.h"
 
 typedef int ErrorCode;
 
@@ -33,9 +34,16 @@ const canary_t RIGHT_DATA_CANARY   = 0xDEADFFFF;
     #define NAME
 #endif
 
-#define INT_T_STACK
+#define NODE_T_STACK
 
 #define logfilename "log.txt"
+
+#ifdef NODE_T_STACK
+    #define FORMAT "p"
+    typedef Node* elem_t;
+    const elem_t POISON = NULL;
+    const int DEFAULT_CAPACITY = 2;
+#endif
 
 #ifdef INT_T_STACK
     #define FORMAT "d"
