@@ -68,7 +68,8 @@ enum Error
     UNABLE_TO_OPEN_FILE,
     UNRECOGNISED_TOKEN,
     SYNTAX_ERROR,
-    UNKNOWN_NAME
+    UNKNOWN_NAME,
+    UNKNOWN_MODE
 };
 
 // ErrorCode CreateTree(Tree* tree);

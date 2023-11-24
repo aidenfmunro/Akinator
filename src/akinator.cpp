@@ -5,12 +5,11 @@
 
 const int MAX_KEY_SIZE = 256;
 
-ErrorCode  ConstructTree      (Tree* tree, const char* basefilename);
 Node*      _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
 Node*      _createNode        (NodeElem_t data, Node* left, Node* right);
 ErrorCode  _searchName        (Tree* tree, const char* name, Stack* path);
-Node*      _searchNode        (const char* name, Node* node);
+Node*      _searchNode        (const char* name, Node* node, Stack* path);
 ErrorCode  addQuestion        (Tree* tree, Node* node, const char* basefilename);
 
 #define BOLD  "\e[1m"
@@ -41,7 +40,7 @@ ErrorCode ProcessMode(const char* basefilename)
 {
     AssertSoft(basefilename, NULL_PTR);
 
-    int key = getKey();
+    Key key = getKey();
 
     return ChooseMode(key, basefilename);
 
@@ -49,37 +48,36 @@ ErrorCode ProcessMode(const char* basefilename)
 
 Key getKey(void)
 {
-    char key = 0;
+    Key key = 0;
 
-    while ((key != GUESS     ) &&
-           (key != DEFINITION) &&
-           (key != COMPARE   ) &&
-           (key != DATABASE  ) &&
-           (key != QUIT      ) &&
-           (key != YES       ) &&
-           (key != NO        )) 
+    while (scanf("%c", &key) == 1 && (key != GUESS)      &&
+                                     (key != DEFINITION) &&
+                                     (key != COMPARE   ) &&
+                                     (key != DATABASE  ) &&
+                                     (key != QUIT      ) &&
+                                     (key != YES       ) &&
+                                     (key != NO        )) 
     {
-        scanf("%c", &key);
         bufferCleaner();
         printf("Unknown key: %c! Please try again\n", key);
     }
 
+    bufferCleaner();
+
     return key;
 }
 
-ErrorCode ChooseMode(char key, const char* basefilename)
+ErrorCode ChooseMode(Key key, const char* basefilename)
 {
     switch (key)
     {
         case GUESS:
         {
-            Guess(basefilename);
-            break;
+            return Guess(basefilename);
         }
         case DEFINITION:
         {
-            Definition(basefilename);
-            break;
+            return Definition(basefilename);
         }
         case COMPARE:
         {
@@ -92,8 +90,7 @@ ErrorCode ChooseMode(char key, const char* basefilename)
         case QUIT:
         {
             printf("Goodbye!\n");
-            return QUIT;
-            break;
+            return OK;
         }
         
         default:
@@ -101,7 +98,7 @@ ErrorCode ChooseMode(char key, const char* basefilename)
             break;
     }
 
-    return OK;
+    return UNKNOWN_MODE;
 }
 
 ErrorCode ConstructTree(Tree* tree, const char* basefilename)
@@ -122,7 +119,6 @@ ErrorCode ConstructTree(Tree* tree, const char* basefilename)
         printf("token [%d]: %s, %d\n", i, base.tokens[i].string, base.tokens[i].length);
     }
     */
-    
 
     size_t curTokenNum = 0;
 
@@ -145,9 +141,7 @@ Node* _recursiveReadTree(Tree* tree, Text* base, size_t* curTokenNum)
     if (openBracket)
         return _recursiveReadNode(tree, base, curTokenNum);
 
-    const char* nil = strstr(token->string, "nil");
-
-    if (nil)
+    if (strcmp(token->string, "nil") == 0)
         return NULL;
     
     tree->error = SYNTAX_ERROR;
@@ -183,9 +177,9 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
 
     tree->size++; 
 
-    token = &base->tokens[(*curTokenNum)++];
+    token = &base->tokens[(*curTokenNum)++]; // DSL
 
-    const char* closeBracket = strchr(token->string, ')');
+    const char* closeBracket = strchr(token->string, ')'); // TODO: closeBracket = token->string, closeBracke == ')'
 
     if (!closeBracket)
     {
@@ -197,7 +191,7 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
     return newNode;
 }
 
-Node* _createNode(NodeElem_t data, Node* left, Node* right)
+Node* _createNode(NodeElem_t data, Node* left, Node* right) // TODO: put in tree.cpp
 {
     SafeCalloc(newNode, 1, Node, NULL);
 
@@ -227,14 +221,16 @@ ErrorCode Definition(const char* basefilename)
     SafeCalloc(name, MAX_STR_SIZE, char, NULL_PTR);
 
     printf("Type in the name that you want to find:\n\n");
-    scanf("%s", name);
+    scanf("%s", name); 
     printf("\n");
 
     CreateStack(path);
 
-    tree.error = _searchName(&tree, name, &path);
+    _searchNode(name, tree.root, &path);
 
-    if (tree.error == UNKNOWN_NAME)
+    printf("%d\n", path.size);
+
+    if (tree.error == UNKNOWN_NAME) // wrap into function 
     {
         printf("The name doesn't exist!\n");
     }
@@ -336,9 +332,9 @@ ErrorCode Guess(const char* basefilename)
     return OK;
 }
 
-ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO: rename to add question
+ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO: rename to add question 
 {
-    AssertSoft(tree, NULL_PTR);
+    AssertSoft(tree, NULL_PTR);                                         // TODO: remove tree from parametr
     AssertSoft(node, NULL_PTR);
     AssertSoft(basefilename, NULL_PTR);
 
@@ -347,7 +343,7 @@ ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO:
 
     char question[MAX_STR_SIZE] = {};
 
-    char answer[MAX_STR_SIZE] = {};
+    char answer[MAX_STR_SIZE]   = {};
 
     scanf("%s", question);
 
@@ -386,7 +382,7 @@ ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
     AssertSoft(name, NULL_PTR);
     AssertSoft(path, NULL_PTR);
 
-    Node* curNode = _searchNode(name, tree->root);
+    Node* curNode = _searchNode(name, tree->root, path);
 
     if (!curNode)
         return UNKNOWN_NAME;
@@ -409,32 +405,31 @@ ErrorCode _searchName(Tree* tree, const char* name, Stack* path)
     return OK;
 }
 
-Node* _searchNode(const char* name, Node* node)
+Node* _searchNode(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
 {
     AssertSoft(name, NULL);
 
-    if (!node)
-    {
-        return NULL;
-    }    
+    printf("%s\n", name);
+    printf("%d\n",path->size);
+
     if (strcmp(node->data, name) == 0)
     {
         return node;
     }
 
-    Node* leftSubTree = _searchNode(name, node->left);
-
-    if (leftSubTree)
+    if (node->right)
     {
-        return leftSubTree;
+        Push(path, 1);
+        return _searchNode(name, node->right, path);
     }
 
-    Node* rightSubTree = _searchNode(name, node->right);
-
-    if (rightSubTree)
+    if (node->left)
     {
-        return rightSubTree;
+        Push(path, 0);
+        return _searchNode(name, node->left, path);
     }
+
+    Pop(path);
 
     return NULL;
 }

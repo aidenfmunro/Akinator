@@ -2,8 +2,6 @@
 #include "stackfuncs.h"
 #include "utils.h"
 
-static int DUMP_NUM = 0;
-
 const int MAX_COMMAND_LENGTH  = 256;
 
 const int MAX_FILENAME_LENGTH = 256;
@@ -88,7 +86,7 @@ static ErrorCode _checkTreeLinks(Tree* tree, Node* node, size_t* counter)
 
     (*counter)++; // TODO: make it in 
 
-    if (node->left != NULL && (node->left->parent != node || node->right->parent != node))
+    if ((node->left != NULL && node->left->parent != node) || (node->right != NULL && node->right->parent != node))
     {
         tree->error = TREE_LINKING_ERROR;
         return TREE_LINKING_ERROR;
@@ -177,9 +175,13 @@ static ErrorCode _dumpTreeTxt(Node* node, FILE* outFile) // TODO: create tree wi
 
 ErrorCode DumpTreeGraph(Node* node)
 {
+    AssertSoft(node, NULL_PTR);
+
+    static int DUMP_NUM = 0;
+
     char filename[MAX_FILENAME_LENGTH] = "";
 
-    sprintf(filename, "log/dot/treegraph_%d.dot", DUMP_NUM);
+    sprintf(filename, "log/dot/treegraph_%d.dot", DUMP_NUM); // NOTE: check for existence of folder
 
     myOpen(filename, "w", outFile);
 
@@ -222,7 +224,7 @@ static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it mo
                   " {<left>left\\n%p | <right>right\\n%p\\n}}\"];\n", 
                   node->data,
                   node->data, node->parent, node,
-                  node->left, node->right);
+                  node->left, node->right); // TODO: create_node and connect_node macro/func!
     }    
     else
     {
@@ -248,7 +250,7 @@ static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it mo
                       "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n"
                       "  edge [color=\"#000000\"];\n",
                       node->data, node->left->data,
-                      node->left->data, node->left->parent->data);
+                      node->left->data, node->data);
         }
 
         _dumpTreeDot(node->left, outFile); // TODO: get rid off copy paste bruh
@@ -267,7 +269,7 @@ static ErrorCode _dumpTreeDot(Node* node, FILE* outFile) // TODO: wtf make it mo
                       "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n" 
                       "  \"" SPECIFIER "\"->\"" SPECIFIER "\";\n",
                       "  edge [color=\"#000000\"];\n", 
-                      node->data, node->right->data, node->right->data, node->right->parent->data);
+                      node->data, node->right->data, node->right->data, node->data);
         }
 
         _dumpTreeDot(node->right, outFile);
