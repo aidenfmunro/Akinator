@@ -2,27 +2,33 @@
 #include "textfuncs.h"
 #include "stackfuncs.h"
 #include "utils.h"
+#include "colors.h"
 
 const int MAX_KEY_SIZE = 256;
 
-Node*      _recursiveReadTree (Tree* tree, Text* base, size_t* curTokenNum);
-Node*      _recursiveReadNode (Tree* tree, Text* base, size_t* curTokenNum);
-Node*      _createNode        (NodeElem_t data, Node* left, Node* right);
-bool       _searchNode        (const char* name, Node* node, Stack* path);
-ErrorCode  addQuestion        (Tree* tree, Node* node, const char* basefilename);
+static Node* readTree_        (Tree* tree, Text* base, size_t* curTokenNum);
 
-#define BOLD  "\e[1m"
-#define RED     "\x1b[31m"
-#define GREEN   "\x1b[32m"
-#define YELLOW  "\x1b[33m"
-#define BLUE    "\x1b[34m"
-#define MAGENTA "\x1b[35m"
-#define CYAN    "\x1b[36m"
-#define COLOR_RESET   "\x1b[0m"
+static Node* reaNode_         (Tree* tree, Text* base, size_t* curTokenNum);
 
-ErrorCode Menu(const char* basefilename)
+static Node* createNode_      (NodeElem_t data, Node* left, Node* right);
+
+static bool  searchNode_      (const char* name, Node* node, Stack* path);
+
+ErrorCode    addQuestion      (Tree* tree, Node* node, const char* baseFileName);
+
+ErrorCode    processMode      (Tree* tree, const char* basefilename);
+
+ErrorCode    giveDefinition   (Tree* tree, const char* basefilename);
+
+ErrorCode    guess            (Tree* tree, const char* basefilename);
+
+ErrorCode    chooseMode       (Key key, Tree* tree, const char* basefilename);
+
+Key          getKey           (void);
+
+ErrorCode Menu(const char* baseFileName)
 {
-    AssertSoft(basefilename, NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
 
     printf("\n" BOLD  "Добро пожаловать в игру Акинатор!                    \n\n" COLOR_RESET
                 GREEN "Выберите соответствующий режим:                      \n\n" COLOR_RESET
@@ -32,17 +38,26 @@ ErrorCode Menu(const char* basefilename)
                       "Просмотр базы данных: ["BLUE"l"COLOR_RESET"]         \n\n"
                       "Выход:                ["BLUE"q"COLOR_RESET"]         \n\n");
 
-    return ProcessMode(basefilename);
+    Tree tree = {};
+
+    ConstructTree(&tree, baseFileName);
+
+    processMode(&tree, baseFileName);
+
+    DestroyTree(&tree);
+
+    return OK;
 }
 
-ErrorCode ProcessMode(const char* basefilename)
+ErrorCode processMode(Tree* tree, const char* baseFileName)
 {
-    AssertSoft(basefilename, NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
 
     Key key = getKey();
 
-    return ChooseMode(key, basefilename);
+    chooseMode(key, tree, baseFileName);
 
+    return OK;
 }
 
 Key getKey(void)
@@ -66,17 +81,17 @@ Key getKey(void)
     return key;
 }
 
-ErrorCode ChooseMode(Key key, const char* basefilename)
+ErrorCode chooseMode(Key key, Tree* tree, const char* baseFileName)
 {
     switch (key)
     {
         case GUESS:
         {
-            return Guess(basefilename);
+            return guess(tree, baseFileName);
         }
         case DEFINITION:
         {
-            return Definition(basefilename);
+            return giveDefinition(tree, baseFileName);
         }
         case COMPARE:
         {
@@ -100,14 +115,14 @@ ErrorCode ChooseMode(Key key, const char* basefilename)
     return UNKNOWN_MODE;
 }
 
-ErrorCode ConstructTree(Tree* tree, const char* basefilename)
+ErrorCode ConstructTree(Tree* tree, const char* baseFileName)
 {
     AssertSoft(tree,         NULL);
-    AssertSoft(basefilename, NULL);
+    AssertSoft(baseFileName, NULL);
 
     Text base = {};
 
-    CreateText(&base, basefilename, NONE);
+    CreateText(&base, baseFileName, NONE);
 
     // --------> DEBUG INFO
     /*
@@ -121,14 +136,14 @@ ErrorCode ConstructTree(Tree* tree, const char* basefilename)
 
     size_t curTokenNum = 0;
 
-    tree->root = _recursiveReadTree(tree, &base, &curTokenNum);
+    tree->root = readTree_(tree, &base, &curTokenNum);
 
     DestroyText(&base);
 
     return OK;   
 }
 
-Node* _recursiveReadTree(Tree* tree, Text* base, size_t* curTokenNum)
+static Node* readTree_(Tree* tree, Text* base, size_t* curTokenNum)
 {   
     AssertSoft(tree,                           NULL);
     AssertSoft(base,                           NULL);
@@ -137,8 +152,9 @@ Node* _recursiveReadTree(Tree* tree, Text* base, size_t* curTokenNum)
     const Token* token = &base->tokens[(*curTokenNum)++];
 
     const char* openBracket = strchr(token->string, '(');
+
     if (openBracket)
-        return _recursiveReadNode(tree, base, curTokenNum);
+        return reaNode_(tree, base, curTokenNum);
 
     if (strcmp(token->string, "nil") == 0)
         return NULL;
@@ -148,7 +164,7 @@ Node* _recursiveReadTree(Tree* tree, Text* base, size_t* curTokenNum)
     return NULL;
 }
 
-Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
+static Node* reaNode_(Tree* tree, Text* base, size_t* curTokenNum)
 {
     AssertSoft(tree,                           NULL);
     AssertSoft(base,                           NULL);
@@ -168,11 +184,11 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
         AssertSoft(! tree->error, NULL);
     }
 
-    Node* leftSubTree  = _recursiveReadTree(tree, base, curTokenNum);
+    Node* leftSubTree  = readTree_(tree, base, curTokenNum);
 
-    Node* rightSubTree = _recursiveReadTree(tree, base, curTokenNum); 
+    Node* rightSubTree = readTree_(tree, base, curTokenNum); 
 
-    Node* newNode      = _createNode(data, leftSubTree, rightSubTree);
+    Node* newNode      = createNode_(data, leftSubTree, rightSubTree);
 
     tree->size++; 
 
@@ -190,7 +206,7 @@ Node* _recursiveReadNode(Tree* tree, Text* base, size_t* curTokenNum)
     return newNode;
 }
 
-Node* _createNode(NodeElem_t data, Node* left, Node* right) // TODO: put in tree.cpp
+static Node* createNode_(NodeElem_t data, Node* left, Node* right) // TODO: put in tree.cpp
 {
     SafeCalloc(newNode, 1, Node, NULL);
 
@@ -209,12 +225,8 @@ Node* _createNode(NodeElem_t data, Node* left, Node* right) // TODO: put in tree
     return newNode;    
 }
 
-ErrorCode Definition(const char* basefilename)
+ErrorCode giveDefinition(Tree* tree, const char* baseFileName)
 {
-    Tree tree = {};
-
-    ConstructTree(&tree, basefilename);
-
     Stack path = {};
 
     SafeCalloc(name, MAX_STR_SIZE, char, NULL_PTR);
@@ -225,7 +237,7 @@ ErrorCode Definition(const char* basefilename)
 
     CreateStack(path);
 
-    bool isNodeFound = _searchNode(name, tree.root, &path);
+    bool isNodeFound = searchNode_(name, tree->root, &path);
 
     if (! isNodeFound) // wrap into function 
     {
@@ -235,15 +247,26 @@ ErrorCode Definition(const char* basefilename)
     {
         Node* curNode = Pop(&path);
 
-        printf("%d\n", path.size);
+        printf("%s это: ", curNode->data);
 
-        printf("%s ", curNode->data);
+        size_t pathSize = path.size;
 
-        for (size_t i = path.size; i >= 0; i--)
+        for (size_t i = 0; i <= pathSize + 2; i++)
         {
-            curNode = Pop(&path);
 
-            printf("-> %s ", curNode->data);
+            if (curNode->parent)
+            {
+                if (curNode->parent->right == curNode)
+                {
+                    printf("%s ", curNode->parent->data);
+                }
+                else if (curNode->parent->left == curNode)
+                {
+                    printf("не %s ", curNode->parent->data);
+                }
+            }
+
+            curNode = Pop(&path);
         }
 
         printf("\n\n");
@@ -251,18 +274,18 @@ ErrorCode Definition(const char* basefilename)
 
     free(name);
 
-    DestroyTree(&tree);
-
     DestroyStack(&path);
 
-    Menu(basefilename);
+    Menu(baseFileName);
 
     return OK;
 }
 
-bool _searchNode(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
+static bool searchNode_(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
 {
-    AssertSoft(name, NULL);
+    AssertSoft(name, false);
+
+    AssertSoft(path, false);
 
     if (! node)
         return false;
@@ -272,7 +295,7 @@ bool _searchNode(const char* name, Node* node, Stack* path) // TODO: pop if subt
     if (strcmp(node->data, name) == 0)
         return true;
 
-    if (_searchNode(name, node->left, path) || _searchNode(name, node->right, path))
+    if (searchNode_(name, node->left, path) || searchNode_(name, node->right, path))
         return true;
 
     Pop(path);
@@ -280,15 +303,13 @@ bool _searchNode(const char* name, Node* node, Stack* path) // TODO: pop if subt
     return false;
 }
 
-ErrorCode Guess(const char* basefilename)
+ErrorCode guess(Tree* tree, const char* baseFileName)
 {
-    AssertSoft(basefilename, NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
 
-    Tree tree = {};
+    AssertSoft(tree, NULL_PTR);
 
-    ConstructTree(&tree, basefilename);
-
-    Node* curNode = tree.root;
+    Node* curNode = tree->root;
 
     char answer = 0;
 
@@ -306,13 +327,9 @@ ErrorCode Guess(const char* basefilename)
 
                 answer = getKey();
 
-                if (answer == NO)
+                if (answer == YES)
                 {
-                    Menu(basefilename);
-                }
-                else
-                {
-                    addQuestion(&tree, curNode, basefilename);
+                    addQuestion(tree, curNode, baseFileName);
                 }
             }
             else if (answer == YES)
@@ -323,7 +340,7 @@ ErrorCode Guess(const char* basefilename)
             break;
         }
 
-        printf("%s [y] or [n] \n", curNode->data);
+        printf("%s? [y] or [n] \n", curNode->data);
 
         answer = getKey();
 
@@ -336,17 +353,19 @@ ErrorCode Guess(const char* basefilename)
             curNode = curNode->right;
         }
     }
-    
-    // DestroyTree(&tree);
+
+    DumpTreeGraph(tree->root);
+
+    Menu(baseFileName);
 
     return OK;
 }
 
-ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO: rename to add question 
+ErrorCode addQuestion(Tree* tree, Node* node, const char* baseFileName) 
 {
     AssertSoft(tree, NULL_PTR);                                         // TODO: remove tree from parametr
     AssertSoft(node, NULL_PTR);
-    AssertSoft(basefilename, NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
 
     printf("what's the difference between %s and your answer?"
             BOLD " (write in question form)" COLOR_RESET "\n\n", node->data);
@@ -369,17 +388,21 @@ ErrorCode addQuestion(Tree* tree, Node* node, const char* basefilename) // TODO:
 
     strcpy(tempDataQuestion, question);
 
-    Node* tempNode2 = _createNode(node->data, NULL, NULL);
+    Node* tempNode2 = createNode_(node->data, NULL, NULL);
 
     node->left = tempNode2;
 
     node->data = tempDataQuestion;
 
-    Node* tempNode1 = _createNode(answer, NULL, NULL);
+    tempNode2->parent = node;
+
+    Node* tempNode1 = createNode_(answer, NULL, NULL); // я блять не связываю ноды с родителем сука утырок
 
     node->right = tempNode1;
 
-    DumpTreeTxt(tree, basefilename);
+    tempNode1->parent = node;
+
+    DumpTreeTxt(tree, baseFileName);
 
     // DumpTreeGraph(tree->root);
 

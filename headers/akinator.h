@@ -24,16 +24,6 @@ enum Keys
 
 ErrorCode Menu(const char* basefilename); // TODO: change to camel
 
-ErrorCode ProcessMode(const char* basefilename);
-
-ErrorCode Definition(const char* basefilename);
-
-ErrorCode Guess(const char* basefilename);
-
-ErrorCode ChooseMode(Key key, const char* basefilename);
-
-Key getKey();
-
 ErrorCode ConstructTree(Tree* tree, const char* basefilename);
 
 
