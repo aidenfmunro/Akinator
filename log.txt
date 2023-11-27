@@ -1,11 +1,11 @@
-This log file was made at: Mon Nov 27 16:57:43 2023
+This log file was made at: Mon Nov 27 20:06:32 2023
 
-Stack  [0x7fffd2df7300], ERROR #512 (CAPACITY_LESS_DEFAULT), in file src/stackfuncs.cpp, line 68, function: reallocStack
+Stack  [0x7ffd88bff750], ERROR #512 (CAPACITY_LESS_DEFAULT), in file src/stackfuncs.cpp, line 68, function: reallocStack
 {
 	size = 0
 	capacity = 1
 
-	data[0x602000000130]:
+	data[0x6020000005d0]:
 
-		   [0] 0x603000000160
+		   [0] 0x6030000008b0
 }

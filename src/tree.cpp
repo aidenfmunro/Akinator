@@ -101,11 +101,59 @@ static ErrorCode _checkTreeLinks(Tree* tree, Node* node, size_t* counter)
     return OK;
 }
 
-ErrorCode searchNode(const char* name, Node* node, Stack* path)
+Node* createNode_(NodeElem_t data, Node* left, Node* right) // TODO: put in tree.cpp
 {
-    AssertSoft(name, NULL_PTR);
+    SafeCalloc(newNode, 1, Node, NULL);
+
+    newNode->data = data;
+
+    if (left)
+        left->parent  = newNode; 
+        
+    if (right)
+        right->parent = newNode;
+    
+    newNode->left  = left;
+    
+    newNode->right = right;
+
+    return newNode;    
+}
+
+bool searchNode_(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
+{
+    AssertSoft(name, false);
+    AssertSoft(path, false);
+
+    if (! node)
+        return false;
+
+    Push(path, node);
+
+    if (strcmp(node->data, name) == 0)
+        return true;
+
+    if (searchNode_(name, node->left, path) || searchNode_(name, node->right, path))
+        return true;
+
+    Pop(path);
+
+    return false;
+}
+
+ErrorCode connectNode(Node* node, Node* leftChild, Node* rightChild)
+{
     AssertSoft(node, NULL_PTR);
-    AssertSoft(path, NULL_PTR);
+
+    node->left = leftChild;
+
+    if (leftChild)
+        leftChild->parent = node;
+
+    node->right = rightChild;
+    
+    if (rightChild)
+        rightChild->parent = node;
 
     return OK;
 }

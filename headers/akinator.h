@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "tree.h"
+#include "treedef.h"
 
 const int MAX_STR_SIZE = 100;
 
@@ -22,7 +22,7 @@ enum Keys
 };
 
 
-ErrorCode Menu(const char* baseFileName); // TODO: change to camel
+ErrorCode Menu(const char* baseFileName);
 
 ErrorCode ConstructTree(Tree* tree, const char* baseFileName);
 

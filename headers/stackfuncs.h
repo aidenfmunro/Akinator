@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <limits.h>
-#include "tree.h"
+#include <treedef.h>
 
 typedef int ErrorCode;
 

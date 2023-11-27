@@ -1,21 +1,16 @@
 #include "akinator.h"
 #include "textfuncs.h"
-#include "stackfuncs.h"
 #include "utils.h"
 #include "locale.h"
 #include "colors.h"
+#include "tree.h"
+#include "treedef.h"
 
 const int MAX_KEY_SIZE = 256;
-
-static ErrorCode connectNode(Node* node, Node* leftChild, Node* rightChild);
 
 static Node* readTree_        (Tree* tree, Text* base, size_t* curTokenNum);
 
 static Node* reaNode_         (Tree* tree, Text* base, size_t* curTokenNum);
-
-static Node* createNode_      (NodeElem_t data, Node* left, Node* right);
-
-static bool  searchNode_      (const char* name, Node* node, Stack* path);
 
 ErrorCode    addQuestion      (Node* node);
 
@@ -92,6 +87,9 @@ Key getKey(void)
 
 ErrorCode chooseMode(Key key, Tree* tree, const char* baseFileName)
 {
+    AssertSoft(tree,         NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
+
     switch (key)
     {
         case GUESS:
@@ -133,16 +131,6 @@ ErrorCode ConstructTree(Tree* tree, const char* baseFileName)
     Text base = {};
 
     CreateText(&base, baseFileName, NONE);
-
-    // --------> DEBUG INFO
-    /*
-    printf("%d\n", base.numTokens);
-
-    for (size_t i = 0; i < base.numTokens; i++)
-    {
-        printf("token [%d]: %s, %d\n", i, base.tokens[i].string, base.tokens[i].length);
-    }
-    */
 
     size_t curTokenNum = 0;
 
@@ -216,24 +204,7 @@ static Node* reaNode_(Tree* tree, Text* base, size_t* curTokenNum)
     return newNode;
 }
 
-static Node* createNode_(NodeElem_t data, Node* left, Node* right) // TODO: put in tree.cpp
-{
-    SafeCalloc(newNode, 1, Node, NULL);
 
-    newNode->data = data;
-
-    if (left)
-        left->parent  = newNode; 
-        
-    if (right)
-        right->parent = newNode;
-    
-    newNode->left  = left;
-    
-    newNode->right = right;
-
-    return newNode;    
-}
 
 ErrorCode giveDefinition(Tree* tree, const char* baseFileName)
 {
@@ -290,27 +261,6 @@ ErrorCode giveDefinition(Tree* tree, const char* baseFileName)
     Menu(baseFileName);
 
     return OK;
-}
-
-static bool searchNode_(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
-{
-    AssertSoft(name, false);
-    AssertSoft(path, false);
-
-    if (! node)
-        return false;
-
-    Push(path, node);
-
-    if (strcmp(node->data, name) == 0)
-        return true;
-
-    if (searchNode_(name, node->left, path) || searchNode_(name, node->right, path))
-        return true;
-
-    Pop(path);
-
-    return false;
 }
 
 ErrorCode guess(Tree* tree, const char* baseFileName)
@@ -386,15 +336,12 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
     printf("Please type in the name of the 2 objects\n\n");
 
     char* name1 = getAnswer();
-
     char* name2 = getAnswer();
 
     bool isFoundNode1 = searchNode_(name1, tree->root, &path1);
-
     bool isFoundNode2 = searchNode_(name2, tree->root, &path2);
 
     size_t index1 = 0;
-
     size_t index2 = 0;
 
     if (isFoundNode1 && isFoundNode2)
@@ -440,6 +387,9 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
 
 ErrorCode givePartNameDef(Stack* path, size_t index)
 {
+    AssertSoft(path, NULL_PTR);
+    AssertSoft(index < path->size - 1, INDEX_OUT_OF_RANGE);
+    
     for (; index < path->size - 1; index++)
         {
             if (path->data[index]->left == path->data[index + 1])
@@ -451,11 +401,13 @@ ErrorCode givePartNameDef(Stack* path, size_t index)
                 printf("%s ", path->data[index]->data);
             }
         }
+    
+    return OK;
 }
 
 ErrorCode addQuestion(Node* node) 
 {
-    AssertSoft(node,         NULL_PTR);
+    AssertSoft(node, NULL_PTR);
 
     printf("what's the difference between %s and your answer?"
            "\n\n", node->data);
@@ -484,21 +436,4 @@ char* getAnswer(void)
     strcpy(tempAnswer, answer);
 
     return tempAnswer;
-}
-
-static ErrorCode connectNode(Node* node, Node* leftChild, Node* rightChild)
-{
-    AssertSoft(node, NULL_PTR);
-
-    node->left = leftChild;
-
-    if (leftChild)
-        leftChild->parent = node;
-
-    node->right = rightChild;
-    
-    if (rightChild)
-        rightChild->parent = node;
-
-    return OK;
 }
