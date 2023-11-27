@@ -2,9 +2,12 @@
 #include "textfuncs.h"
 #include "stackfuncs.h"
 #include "utils.h"
+#include "locale.h"
 #include "colors.h"
 
 const int MAX_KEY_SIZE = 256;
+
+static ErrorCode connectNode(Node* node, Node* leftChild, Node* rightChild);
 
 static Node* readTree_        (Tree* tree, Text* base, size_t* curTokenNum);
 
@@ -14,7 +17,7 @@ static Node* createNode_      (NodeElem_t data, Node* left, Node* right);
 
 static bool  searchNode_      (const char* name, Node* node, Stack* path);
 
-ErrorCode    addQuestion      (Tree* tree, Node* node, const char* baseFileName);
+ErrorCode    addQuestion      (Node* node, const char* baseFileName);
 
 ErrorCode    processMode      (Tree* tree, const char* basefilename);
 
@@ -119,6 +122,8 @@ ErrorCode ConstructTree(Tree* tree, const char* baseFileName)
 {
     AssertSoft(tree,         NULL);
     AssertSoft(baseFileName, NULL);
+
+    setlocale(LC_NAME, "en_US.US-ASCII");
 
     Text base = {};
 
@@ -329,7 +334,7 @@ ErrorCode guess(Tree* tree, const char* baseFileName)
 
                 if (answer == YES)
                 {
-                    addQuestion(tree, curNode, baseFileName);
+                    addQuestion(curNode, baseFileName);
                 }
             }
             else if (answer == YES)
@@ -354,6 +359,8 @@ ErrorCode guess(Tree* tree, const char* baseFileName)
         }
     }
 
+    DumpTreeTxt(tree, baseFileName);
+
     DumpTreeGraph(tree->root);
 
     Menu(baseFileName);
@@ -361,14 +368,55 @@ ErrorCode guess(Tree* tree, const char* baseFileName)
     return OK;
 }
 
-ErrorCode addQuestion(Tree* tree, Node* node, const char* baseFileName) 
+ErrorCode Compare(Tree* tree)
 {
-    AssertSoft(tree, NULL_PTR);                                         // TODO: remove tree from parametr
-    AssertSoft(node, NULL_PTR);
-    AssertSoft(baseFileName, NULL_PTR);
+    Stack path1 = {};
+    Stack path2 = {};
+    CreateStack(path1);
+    CreateStack(path1);
+
+    char name1[MAX_STR_SIZE] = {};
+
+    char name2[MAX_STR_SIZE] = {};
+
+    printf("Please type in the name of the 2 objects\n\n");
+
+    scanf("%s %s", name1, name2);
+
+    bool isFoundNode1 = searchNode_(name1, tree->root, &path1);
+
+    bool isFoundNode2 = searchNode_(name2, tree->root, &path2);
+
+    Node* curNode1 = Pop(&path1);
+
+    Node* curNode2 = Pop(&path2);
+
+    if (isFoundNode1 && isFoundNode2)
+    {
+        while (curNode1 != tree->root && curNode2 != tree->root)
+        {
+            if (curNode1 == curNode2)
+            {
+            ;   
+            }
+        }
+    }
+    else
+    {
+        printf("One of the names you typed doesn't exist!\n\n");
+    }
+
+    DestroyStack(&path1);
+
+    DestroyStack(&path2);
+}
+
+ErrorCode addQuestion(Node* node, const char* baseFileName) 
+{
+    AssertSoft(node,         NULL_PTR);
 
     printf("what's the difference between %s and your answer?"
-            BOLD " (write in question form)" COLOR_RESET "\n\n", node->data);
+           "\n\n", node->data);
 
     char question[MAX_STR_SIZE] = {};
 
@@ -388,23 +436,26 @@ ErrorCode addQuestion(Tree* tree, Node* node, const char* baseFileName)
 
     strcpy(tempDataQuestion, question);
 
-    Node* tempNode2 = createNode_(node->data, NULL, NULL);
-
-    node->left = tempNode2;
+    connectNode(node, createNode_(node->data, NULL, NULL), createNode_(answer, NULL, NULL));
 
     node->data = tempDataQuestion;
 
-    tempNode2->parent = node;
+    return OK;
+}
 
-    Node* tempNode1 = createNode_(answer, NULL, NULL); // я блять не связываю ноды с родителем сука утырок
+static ErrorCode connectNode(Node* node, Node* leftChild, Node* rightChild)
+{
+    AssertSoft(node, NULL_PTR);
 
-    node->right = tempNode1;
+    node->left = leftChild;
 
-    tempNode1->parent = node;
+    if (leftChild)
+        leftChild->parent = node;
 
-    DumpTreeTxt(tree, baseFileName);
-
-    // DumpTreeGraph(tree->root);
+    node->right = rightChild;
+    
+    if (rightChild)
+        rightChild->parent = node;
 
     return OK;
 }
