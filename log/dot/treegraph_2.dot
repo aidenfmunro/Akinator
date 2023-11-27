@@ -1,0 +1,19 @@
+  digraph tree  {
+  node[   shape     = "Mrecord",  style     = "filled",  fillcolor = "aqua",  fontcolor = "#000000",  margin    = "0.075"];
+  rankdir   = "TB";
+
+  label     = "Tree Dump";
+ "pretty" [shape = "Mrecord", label = "{<name>pretty | parent\n(nil) | <f0> address\n0x6030000002b0| {<left>left\n0x603000000250 | <right>right\n0x603000000280\n}}"];
+  "pretty":left->"small";
+ "small" [shape = "Mrecord", label = "{<name>small | parent\n0x6030000002b0 | <f0> address\n0x603000000250| {<left>left\n0x6030000001f0 | <right>right\n0x603000000220\n}}"];
+  "small":left->"who";
+ "who" [shape = "Mrecord", fillcolor = "coral", label = "{<name>who | parent\n0x603000000250 | <f0> address\n0x6030000001f0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  "small":right->"table";
+ "table" [shape = "Mrecord", fillcolor = "coral", label = "{<name>table | parent\n0x603000000250 | <f0> address\n0x603000000220| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  "pretty":right->"crazy";
+ "crazy" [shape = "Mrecord", label = "{<name>crazy | parent\n0x6030000002b0 | <f0> address\n0x603000000280| {<left>left\n0x603000000310 | <right>right\n0x6030000002e0\n}}"];
+  "crazy":left->"jack";
+ "jack" [shape = "Mrecord", fillcolor = "coral", label = "{<name>jack | parent\n0x603000000280 | <f0> address\n0x603000000310| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  "crazy":right->"tom";
+ "tom" [shape = "Mrecord", fillcolor = "coral", label = "{<name>tom | parent\n0x603000000280 | <f0> address\n0x6030000002e0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  }

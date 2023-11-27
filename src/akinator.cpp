@@ -17,17 +17,21 @@ static Node* createNode_      (NodeElem_t data, Node* left, Node* right);
 
 static bool  searchNode_      (const char* name, Node* node, Stack* path);
 
-ErrorCode    addQuestion      (Node* node, const char* baseFileName);
+ErrorCode    addQuestion      (Node* node);
 
-ErrorCode    processMode      (Tree* tree, const char* basefilename);
+ErrorCode    processMode      (Tree* tree, const char* baseFileName);
 
-ErrorCode    giveDefinition   (Tree* tree, const char* basefilename);
+ErrorCode    giveDefinition   (Tree* tree, const char* baseFileName);
 
-ErrorCode    guess            (Tree* tree, const char* basefilename);
+ErrorCode    guess            (Tree* tree, const char* baseFileName);
 
-ErrorCode    chooseMode       (Key key, Tree* tree, const char* basefilename);
+ErrorCode    compare          (Tree* tree, const char* baseFileName);
+
+ErrorCode    chooseMode       (Key key, Tree* tree, const char* baseFileName);
 
 Key          getKey           (void);
+
+char*        getAnswer        (void);
 
 ErrorCode Menu(const char* baseFileName)
 {
@@ -98,6 +102,7 @@ ErrorCode chooseMode(Key key, Tree* tree, const char* baseFileName)
         }
         case COMPARE:
         {
+            return compare(tree, baseFileName);
             break;
         }
         case DATABASE:
@@ -332,7 +337,7 @@ ErrorCode guess(Tree* tree, const char* baseFileName)
 
                 if (answer == YES)
                 {
-                    addQuestion(curNode, baseFileName);
+                    addQuestion(curNode);
                 }
             }
             else if (answer == YES)
@@ -366,39 +371,63 @@ ErrorCode guess(Tree* tree, const char* baseFileName)
     return OK;
 }
 
-ErrorCode Compare(Tree* tree)
+ErrorCode compare(Tree* tree, const char* baseFileName)
 {
+    AssertSoft(tree, NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
+
     Stack path1 = {};
     Stack path2 = {};
+
     CreateStack(path1);
     CreateStack(path1);
-
-    char name1[MAX_STR_SIZE] = {};
-
-    char name2[MAX_STR_SIZE] = {};
 
     printf("Please type in the name of the 2 objects\n\n");
 
-    scanf("%s %s", name1, name2);
+    char* name1 = getAnswer();
+
+    printf("%s\n", name1);
+
+    char* name2 = getAnswer();
+
+    printf("%s\n", name2);
 
     bool isFoundNode1 = searchNode_(name1, tree->root, &path1);
 
     bool isFoundNode2 = searchNode_(name2, tree->root, &path2);
 
-    Node* curNode1 = Pop(&path1);
+    size_t index1 = 0;
 
-    Node* curNode2 = Pop(&path2);
+    size_t index2 = 0;
+
+    printf("%d %d\n", isFoundNode1, isFoundNode2);
 
     if (isFoundNode1 && isFoundNode2)
-    {
-        while (curNode1 != tree->root && curNode2 != tree->root)
+    {   
+        printf("The similarities are: ");
+
+        while (path1.data[index1] == path2.data[index2] && (index1 < path1.size - 1) && (index2 < path2.size - 1))
         {
-            if (curNode1 == curNode2)
-            {
-            ;   
-            }
+            printf("%s ", path1.data[index1]->data);
+        }
+
+        printf("The differences are: ");
+
+        printf("%s: ", name1);
+
+        for (; index1 < path1.size - 1; index1++)
+        {
+            printf("%s ", path1.data[index1]->data);
+        }
+
+        printf("%s: ", name2);
+
+        for (; index2 < path2.size - 1; index2++)
+        {
+            printf("%s ", path2.data[index2]->data);
         }
     }
+
     else
     {
         printf("One of the names you typed doesn't exist!\n\n");
@@ -407,38 +436,47 @@ ErrorCode Compare(Tree* tree)
     DestroyStack(&path1);
 
     DestroyStack(&path2);
+
+    free(name1);
+
+    free(name2);
+
+    // Menu(baseFileName);
+
+    return OK;
 }
 
-ErrorCode addQuestion(Node* node, const char* baseFileName) 
+ErrorCode addQuestion(Node* node) 
 {
     AssertSoft(node,         NULL_PTR);
-
-    char question[MAX_STR_SIZE] = {};
-
-    char answer[MAX_STR_SIZE]   = {};
 
     printf("what's the difference between %s and your answer?"
            "\n\n", node->data);
 
-    scanf("%s", question);
+    char* difference = getAnswer();
 
     printf("what's your answer? \n\n");
 
-    scanf("%s", answer);
+    char* answer = getAnswer();
 
-    SafeCalloc(tempDataAnswer, MAX_STR_SIZE, char, NO_MEMORY);
-    
-    strcpy(tempDataAnswer, answer);
+    connectNode(node, createNode_(node->data, NULL, NULL), createNode_(answer, NULL, NULL));
 
-    SafeCalloc(tempDataQuestion, MAX_STR_SIZE, char, NO_MEMORY);
-
-    strcpy(tempDataQuestion, question);
-
-    connectNode(node, createNode_(node->data, NULL, NULL), createNode_(tempDataAnswer, NULL, NULL));
-
-    node->data = tempDataQuestion;
+    node->data = difference;
 
     return OK;
+}
+
+char* getAnswer(void)
+{
+    char answer[MAX_STR_SIZE] = {};
+
+    scanf("%s", answer);
+
+    SafeCalloc(tempAnswer, MAX_STR_SIZE, char, NULL);
+
+    strcpy(tempAnswer, answer);
+
+    return tempAnswer;
 }
 
 static ErrorCode connectNode(Node* node, Node* leftChild, Node* rightChild)

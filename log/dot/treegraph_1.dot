@@ -3,9 +3,13 @@
   rankdir   = "TB";
 
   label     = "Tree Dump";
- "bebra" [shape = "Mrecord", label = "{<name>bebra | parent\n(nil) | <f0> address\n0x6030000001f0| {<left>left\n0x603000000190 | <right>right\n0x6030000001c0\n}}"];
-  "bebra":left->"who";
- "who" [shape = "Mrecord", fillcolor = "coral", label = "{<name>who | parent\n0x6030000001f0 | <f0> address\n0x603000000190| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
-  "bebra":right->"asdsd";
- "asdsd" [shape = "Mrecord", fillcolor = "coral", label = "{<name>asdsd | parent\n0x6030000001f0 | <f0> address\n0x6030000001c0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+ "pretty" [shape = "Mrecord", label = "{<name>pretty | parent\n(nil) | <f0> address\n0x603000000160| {<left>left\n0x603000000100 | <right>right\n0x603000000130\n}}"];
+  "pretty":left->"small";
+ "small" [shape = "Mrecord", label = "{<name>small | parent\n0x603000000160 | <f0> address\n0x603000000100| {<left>left\n0x6030000001c0 | <right>right\n0x603000000190\n}}"];
+  "small":left->"who";
+ "who" [shape = "Mrecord", fillcolor = "coral", label = "{<name>who | parent\n0x603000000100 | <f0> address\n0x6030000001c0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  "small":right->"table";
+ "table" [shape = "Mrecord", fillcolor = "coral", label = "{<name>table | parent\n0x603000000100 | <f0> address\n0x603000000190| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  "pretty":right->"jack";
+ "jack" [shape = "Mrecord", fillcolor = "coral", label = "{<name>jack | parent\n0x603000000160 | <f0> address\n0x603000000130| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
   }

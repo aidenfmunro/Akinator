@@ -22,9 +22,9 @@ enum Keys
 };
 
 
-ErrorCode Menu(const char* basefilename); // TODO: change to camel
+ErrorCode Menu(const char* baseFileName); // TODO: change to camel
 
-ErrorCode ConstructTree(Tree* tree, const char* basefilename);
+ErrorCode ConstructTree(Tree* tree, const char* baseFileName);
 
 
 #endif

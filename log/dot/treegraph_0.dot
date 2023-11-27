@@ -3,9 +3,9 @@
   rankdir   = "TB";
 
   label     = "Tree Dump";
- "bebra" [shape = "Mrecord", label = "{<name>bebra | parent\n(nil) | <f0> address\n0x603000000070| {<left>left\n0x6030000000d0 | <right>right\n0x6030000000a0\n}}"];
-  "bebra":left->"who";
+ "pretty" [shape = "Mrecord", label = "{<name>pretty | parent\n(nil) | <f0> address\n0x603000000070| {<left>left\n0x6030000000d0 | <right>right\n0x6030000000a0\n}}"];
+  "pretty":left->"who";
  "who" [shape = "Mrecord", fillcolor = "coral", label = "{<name>who | parent\n0x603000000070 | <f0> address\n0x6030000000d0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
-  "bebra":right->"asdsd";
- "asdsd" [shape = "Mrecord", fillcolor = "coral", label = "{<name>asdsd | parent\n0x603000000070 | <f0> address\n0x6030000000a0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
+  "pretty":right->"jack";
+ "jack" [shape = "Mrecord", fillcolor = "coral", label = "{<name>jack | parent\n0x603000000070 | <f0> address\n0x6030000000a0| {<left>left\n(nil) | <right>right\n(nil)\n}}"];
   }
