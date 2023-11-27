@@ -123,8 +123,6 @@ ErrorCode ConstructTree(Tree* tree, const char* baseFileName)
     AssertSoft(tree,         NULL);
     AssertSoft(baseFileName, NULL);
 
-    setlocale(LC_NAME, "en_US.US-ASCII");
-
     Text base = {};
 
     CreateText(&base, baseFileName, NONE);
@@ -415,28 +413,28 @@ ErrorCode addQuestion(Node* node, const char* baseFileName)
 {
     AssertSoft(node,         NULL_PTR);
 
-    printf("what's the difference between %s and your answer?"
-           "\n\n", node->data);
-
     char question[MAX_STR_SIZE] = {};
 
     char answer[MAX_STR_SIZE]   = {};
 
+    printf("what's the difference between %s and your answer?"
+           "\n\n", node->data);
+
     scanf("%s", question);
 
-    SafeCalloc(tempDataAnswer, MAX_STR_SIZE, char, NO_MEMORY);
-
-    strcpy(tempDataAnswer, answer);
-
     printf("what's your answer? \n\n");
-    
+
     scanf("%s", answer);
+
+    SafeCalloc(tempDataAnswer, MAX_STR_SIZE, char, NO_MEMORY);
+    
+    strcpy(tempDataAnswer, answer);
 
     SafeCalloc(tempDataQuestion, MAX_STR_SIZE, char, NO_MEMORY);
 
     strcpy(tempDataQuestion, question);
 
-    connectNode(node, createNode_(node->data, NULL, NULL), createNode_(answer, NULL, NULL));
+    connectNode(node, createNode_(node->data, NULL, NULL), createNode_(tempDataAnswer, NULL, NULL));
 
     node->data = tempDataQuestion;
 
