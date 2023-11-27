@@ -380,7 +380,7 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
     Stack path2 = {};
 
     CreateStack(path1);
-    CreateStack(path1);
+    CreateStack(path2);
 
     printf("Please type in the name of the 2 objects\n\n");
 
@@ -400,15 +400,16 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
 
     size_t index2 = 0;
 
-    printf("%d %d\n", isFoundNode1, isFoundNode2);
-
     if (isFoundNode1 && isFoundNode2)
     {   
         printf("The similarities are: ");
 
-        while (path1.data[index1] == path2.data[index2] && (index1 < path1.size - 1) && (index2 < path2.size - 1))
+        while (path1.data[index1 + 1] == path2.data[index2 + 1] && (index1 < path1.size - 1) && (index2 < path2.size - 1))
         {
             printf("%s ", path1.data[index1]->data);
+
+            index1++;
+            index2++;
         }
 
         printf("The differences are: ");
@@ -417,14 +418,29 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
 
         for (; index1 < path1.size - 1; index1++)
         {
-            printf("%s ", path1.data[index1]->data);
+            if (path1.data[index1]->left == path1.data[index1 + 1])
+            {
+                printf("not %s ", path1.data[index1]->data);
+
+            }
+            if (path1.data[index1]->right == path1.data[index1 + 1])
+            {
+                printf("%s ", path1.data[index1]->data);
+            }
         }
 
         printf("%s: ", name2);
 
         for (; index2 < path2.size - 1; index2++)
         {
-            printf("%s ", path2.data[index2]->data);
+            if (path2.data[index2]->left == path2.data[index2 + 1])
+            {
+                printf("not %s ", path2.data[index2]->data);
+            }
+            if (path2.data[index2]->right == path2.data[index2 + 1])
+            {
+                printf("%s ", path2.data[index2]->data);
+            }
         }
     }
 
@@ -441,7 +457,7 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
 
     free(name2);
 
-    // Menu(baseFileName);
+    Menu(baseFileName);
 
     return OK;
 }

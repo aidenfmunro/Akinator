@@ -1,6 +1,6 @@
-This log file was made at: Mon Nov 27 15:17:46 2023
+This log file was made at: Mon Nov 27 16:30:57 2023
 
-Stack  [0x7fff0b4c9d90], ERROR #514 (UNKNOWN), in file src/stackfuncs.cpp, line 79, function: Push
+Stack  [0x7ffd45b25c70], ERROR #514 (UNKNOWN), in file src/stackfuncs.cpp, line 79, function: Push
 {
 	size = 0
 	capacity = 0
