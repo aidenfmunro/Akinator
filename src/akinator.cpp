@@ -27,6 +27,8 @@ ErrorCode    guess            (Tree* tree, const char* baseFileName);
 
 ErrorCode    compare          (Tree* tree, const char* baseFileName);
 
+ErrorCode    givePartNameDef  (Stack* path, size_t index);
+
 ErrorCode    chooseMode       (Key key, Tree* tree, const char* baseFileName);
 
 Key          getKey           (void);
@@ -235,13 +237,14 @@ static Node* createNode_(NodeElem_t data, Node* left, Node* right) // TODO: put 
 
 ErrorCode giveDefinition(Tree* tree, const char* baseFileName)
 {
+    AssertSoft(tree,         NULL_PTR);
+    AssertSoft(baseFileName, NULL_PTR);
+
     Stack path = {};
 
-    SafeCalloc(name, MAX_STR_SIZE, char, NULL_PTR);
-
     printf("Type in the name that you want to find:\n\n");
-    scanf("%s", name); 
-    printf("\n");
+
+    char* name = getAnswer();
 
     CreateStack(path);
 
@@ -292,7 +295,6 @@ ErrorCode giveDefinition(Tree* tree, const char* baseFileName)
 static bool searchNode_(const char* name, Node* node, Stack* path) // TODO: pop if subtree doesn't contain name, 1 way down
 {
     AssertSoft(name, false);
-
     AssertSoft(path, false);
 
     if (! node)
@@ -314,8 +316,7 @@ static bool searchNode_(const char* name, Node* node, Stack* path) // TODO: pop 
 ErrorCode guess(Tree* tree, const char* baseFileName)
 {
     AssertSoft(baseFileName, NULL_PTR);
-
-    AssertSoft(tree, NULL_PTR);
+    AssertSoft(tree,         NULL_PTR);
 
     Node* curNode = tree->root;
 
@@ -373,7 +374,7 @@ ErrorCode guess(Tree* tree, const char* baseFileName)
 
 ErrorCode compare(Tree* tree, const char* baseFileName)
 {
-    AssertSoft(tree, NULL_PTR);
+    AssertSoft(tree,         NULL_PTR);
     AssertSoft(baseFileName, NULL_PTR);
 
     Stack path1 = {};
@@ -386,11 +387,7 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
 
     char* name1 = getAnswer();
 
-    printf("%s\n", name1);
-
     char* name2 = getAnswer();
-
-    printf("%s\n", name2);
 
     bool isFoundNode1 = searchNode_(name1, tree->root, &path1);
 
@@ -402,9 +399,10 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
 
     if (isFoundNode1 && isFoundNode2)
     {   
-        printf("The similarities are: ");
+        printf("\nThe similarities are: ");
 
-        while (path1.data[index1 + 1] == path2.data[index2 + 1] && (index1 < path1.size - 1) && (index2 < path2.size - 1))
+        while (path1.data[index1 + 1] == path2.data[index2 + 1] && (index1 < path1.size - 1)
+                                                                && (index2 < path2.size - 1))
         {
             printf("%s ", path1.data[index1]->data);
 
@@ -412,38 +410,16 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
             index2++;
         }
 
-        printf("The differences are: ");
+        printf("\nThe differences are ");
 
-        printf("%s: ", name1);
+        printf("\n%s: ", name1);
 
-        for (; index1 < path1.size - 1; index1++)
-        {
-            if (path1.data[index1]->left == path1.data[index1 + 1])
-            {
-                printf("not %s ", path1.data[index1]->data);
+        givePartNameDef(&path1, index1);
 
-            }
-            if (path1.data[index1]->right == path1.data[index1 + 1])
-            {
-                printf("%s ", path1.data[index1]->data);
-            }
-        }
+        printf("\n%s: ", name2);
 
-        printf("%s: ", name2);
-
-        for (; index2 < path2.size - 1; index2++)
-        {
-            if (path2.data[index2]->left == path2.data[index2 + 1])
-            {
-                printf("not %s ", path2.data[index2]->data);
-            }
-            if (path2.data[index2]->right == path2.data[index2 + 1])
-            {
-                printf("%s ", path2.data[index2]->data);
-            }
-        }
+        givePartNameDef(&path2, index2);
     }
-
     else
     {
         printf("One of the names you typed doesn't exist!\n\n");
@@ -460,6 +436,21 @@ ErrorCode compare(Tree* tree, const char* baseFileName)
     Menu(baseFileName);
 
     return OK;
+}
+
+ErrorCode givePartNameDef(Stack* path, size_t index)
+{
+    for (; index < path->size - 1; index++)
+        {
+            if (path->data[index]->left == path->data[index + 1])
+            {
+                printf("not %s ", path->data[index]->data);
+            }
+            if (path->data[index]->right == path->data[index + 1])
+            {
+                printf("%s ", path->data[index]->data);
+            }
+        }
 }
 
 ErrorCode addQuestion(Node* node) 
