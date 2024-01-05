@@ -34,6 +34,8 @@ ErrorCode Menu(const char* baseFileName)
 {
     AssertSoft(baseFileName, NULL_PTR);
 
+    system("");
+
     printf("\n" BOLD  "Добро пожаловать в игру Акинатор!                    \n\n" COLOR_RESET
                 GREEN "Выберите соответствующий режим:                      \n\n" COLOR_RESET
                       "Отгадывание:          ["BLUE"g"COLOR_RESET"]         \n\n"
@@ -68,16 +70,17 @@ Key getKey(void)
 {
     Key key = 0;
 
-    while (scanf("%c", &key) == 1 && (key != GUESS)      &&
-                                     (key != DEFINITION) &&
-                                     (key != COMPARE   ) &&
-                                     (key != DATABASE  ) &&
-                                     (key != QUIT      ) &&
-                                     (key != YES       ) &&
-                                     (key != NO        )) 
+    while (scanf(" %c", &key) == 1 &&  (key != GUESS)      &&
+                                       (key != DEFINITION) &&
+                                       (key != COMPARE   ) &&
+                                       (key != DATABASE  ) &&
+                                       (key != QUIT      ) &&
+                                       (key != YES       ) &&
+                                       (key != NO        )) 
     {
         bufferCleaner();
-        printf("Unknown key: %c! Please try again\n", key);
+        if (key != '\n')
+            printf("Unknown key: %c! Please try again\n", key);
     }
 
     bufferCleaner();
@@ -133,6 +136,7 @@ ErrorCode ConstructTree(Tree* tree, const char* baseFileName)
     CreateText(&base, baseFileName, NONE);
 
     size_t curTokenNum = 0;
+
 
     tree->root = readTree_(tree, &base, &curTokenNum);
 
@@ -192,7 +196,7 @@ static Node* reaNode_(Tree* tree, Text* base, size_t* curTokenNum)
 
     token = &base->tokens[(*curTokenNum)++]; // DSL
 
-    const char* closeBracket = strchr(token->string, ')'); // TODO: closeBracket = token->string, closeBracke == ')'
+    const char* closeBracket = strchr(token->string, ')');
 
     if (!closeBracket)
     {
@@ -425,11 +429,13 @@ ErrorCode addQuestion(Node* node)
     return OK;
 }
 
+#define MAX_STR_SIZE_MACRO "99"
+
 char* getAnswer(void)
 {
     char answer[MAX_STR_SIZE] = {};
 
-    scanf("%s", answer);
+    scanf("%"MAX_STR_SIZE_MACRO"s", answer);
 
     SafeCalloc(tempAnswer, MAX_STR_SIZE, char, NULL);
 
